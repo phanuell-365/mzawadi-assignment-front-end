@@ -13,6 +13,8 @@ import type {Ref} from "vue";
 import {reactive, ref} from "vue";
 import CreateModalContainer from "../components/modals/create/CreateModalContainer.vue";
 import {ModalOptions} from "../components/modals/interfaces";
+import {useRoutingStore} from "../stores/routing";
+import {RouteRecordName, useRoute} from "vue-router";
 
 const modalContainerRef: Ref<InstanceType<typeof CreateModalContainer>> = ref();
 
@@ -30,6 +32,14 @@ const options = reactive({
     console.log('modal has been toggled');
   }
 } as ModalOptions);
+
+
+const routingStore = useRoutingStore();
+
+const route = useRoute();
+
+// set the current route name in the routing store
+routingStore.setCurrentRoute(<RouteRecordName>route?.name as string);
 
 </script>
 

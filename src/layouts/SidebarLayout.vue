@@ -1,13 +1,10 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+  <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-4">
     <aside
-        class="hidden fixed lg:block z-20 bg-white dark:bg-gray-700 inset-0 pb-10 px-8 right-auto w-[19.5rem] left-[max(0px,calc(50%-45rem))]">
+        class="hidden fixed lg:block z-20 bg-white dark:bg-zinc-700 inset-0 pb-10 px-5 right-auto w-[15rem] left-[max(0px,calc(50%-45rem))]">
       <slot name="navProps"/>
     </aside>
-    <main class="lg:pl-[19.5rem] ">
-      <div>
-        <ToggleDark/>
-      </div>
+    <main class="lg:pl-[15rem] ">
       <div>
         <slot name="pages"/>
       </div>
@@ -16,7 +13,20 @@
 </template>
 
 <script lang="ts" setup>
-import ToggleDark from "../components/buttons/ToggleDark.vue";</script>
+// import ToggleDark from "../components/buttons/ToggleDark.vue";
+import {useRoutingStore} from "../stores/routing";
+import {onUpdated, ref, Ref} from "vue";
+
+const routingStore = useRoutingStore();
+
+const currentRouteName: Ref<string | undefined> = ref(routingStore.getCurrentRouteName)
+
+onUpdated(() => {
+  currentRouteName.value = routingStore.getCurrentRouteName
+})
+
+console.error({currentRouteName})
+</script>
 
 <style scoped>
 
