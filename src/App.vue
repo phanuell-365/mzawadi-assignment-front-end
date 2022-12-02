@@ -1,31 +1,29 @@
-<script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import HelloWorld from './components/HelloWorld.vue'
+<script lang="ts" setup>
+import SidebarLayout from "./layouts/SidebarLayout.vue";
+import {useDark, useToggle} from '@vueuse/core'
+
+const isDark = useDark()
+const toggleDark = useToggle(isDark)
+
 </script>
 
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div class="dark:bg-gray-700 bg-rose-50">
+
+    <SidebarLayout>
+      <template #navProps>
+        <h3 class="p-2 m-2 bg-rose-50 dark:bg-gray-600 text-zinc-800 dark:text-rose-100 rounded">
+          Route
+          Name:</h3>
+      </template>
+      <template #pages="{routeName}">
+        <RouterView>
+        </RouterView>
+      </template>
+    </SidebarLayout>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
+
 </style>
