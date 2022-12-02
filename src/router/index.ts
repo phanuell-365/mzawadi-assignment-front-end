@@ -4,6 +4,11 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: "/users",
+      name: "users-page",
+      component: () => import("../pages/UsersPage.vue"),
+    },
+    {
       path: "/dashboard",
       name: "dashboard-page",
       component: () => import("../pages/DashboardPage.vue"),

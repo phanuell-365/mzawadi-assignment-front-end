@@ -14,18 +14,6 @@
 
 <script lang="ts" setup>
 // import ToggleDark from "../components/buttons/ToggleDark.vue";
-import {useRoutingStore} from "../stores/routing";
-import {onUpdated, ref, Ref} from "vue";
-
-const routingStore = useRoutingStore();
-
-const currentRouteName: Ref<string | undefined> = ref(routingStore.getCurrentRouteName)
-
-onUpdated(() => {
-  currentRouteName.value = routingStore.getCurrentRouteName
-})
-
-console.error({currentRouteName})
 </script>
 
 <style scoped>

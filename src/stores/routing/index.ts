@@ -1,59 +1,68 @@
 import { defineStore } from "pinia";
 
-interface Routes {
+export interface Routes {
   path: string;
   name: string;
   active: boolean;
+  description: string;
 }
 
 const allRoutes: Routes[] = [
   {
+    path: "/users",
+    name: "users-page",
+    active: false,
+    description: "user",
+  },
+  {
     path: "/dashboard",
     name: "dashboard-page",
     active: false,
+    description: "dashboard",
   },
   {
     path: "/consumers",
     name: "consumers-page",
     active: false,
+    description: "consumer",
   },
   {
     path: "/distributors",
     name: "distributors-page",
     active: false,
+    description: "distributor",
   },
   {
     path: "/points",
     name: "points-page",
     active: false,
+    description: "point",
   },
   {
     path: "/products",
     name: "products-page",
     active: false,
+    description: "product",
   },
   {
     path: "/rewards",
     name: "rewards-page",
     active: false,
+    description: "reward",
   },
   {
     path: "/sales",
     name: "sales-page",
     active: false,
+    description: "sale",
   },
   {
     path: "/targets",
     name: "targets-page",
     active: false,
+    description: "target",
   },
 ];
-
-interface CurrentRoute {
-  routeName: string;
-  routePath: string;
-  active: boolean;
-}
 
 interface RoutingState {
   routes: Routes[];
@@ -76,6 +85,10 @@ export const useRoutingStore = defineStore({
     getCurrentRoutePath: (state) => {
       const currentRoute = state.routes.find((value) => value.active);
       return currentRoute?.path;
+    },
+    getCurrentRouteDescription: (state) => {
+      const currentRoute = state.routes.find((value) => value.active);
+      return currentRoute?.description;
     },
   },
   actions: {
