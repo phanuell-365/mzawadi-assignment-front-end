@@ -8,3 +8,8 @@ export interface ProductObject {
   name: string;
   price: number;
 }
+
+export interface UpdateProduct {
+  name?: string;
+  price?: number;
+}
