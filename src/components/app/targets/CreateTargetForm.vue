@@ -114,7 +114,7 @@
           v-if="!productIdMeta.valid && productIdMeta.validated"
           class="mt-2 block text-pink-600 dark:text-pink-500 text-sm"
         >
-          {{ distributorIdErrorMessage }}
+          {{ productIdErrorMessage }}
         </small>
         <small
           v-else-if="!productIdMeta.validated && !formIsValid"
@@ -144,10 +144,18 @@
 
 <script lang="ts" setup>
 import { useField } from "vee-validate";
-import { computed, onMounted, ref, Ref, watch } from "vue";
-import { DistributorObject } from "../../../stores/distributors/interfaces";
-import { ProductObject } from "../../../stores/products/interfaces";
+import { onMounted, ref, Ref } from "vue";
 import { CreateTarget } from "../../../stores/targets/interfaces";
+import { useRequest } from "vue-request";
+import { useDistributorsStore } from "../../../stores/distributors";
+import { useProductsStore } from "../../../stores/products";
+import { useTargetsStore } from "../../../stores/targets";
+
+const distributorsStore = useDistributorsStore();
+
+const productsStore = useProductsStore();
+
+const targetsStore = useTargetsStore();
 
 const {
   value: DistributorName,
@@ -183,77 +191,99 @@ const {
   meta: salesTargetMeta,
 } = useField("salesTarget", salesTargetValidation);
 
-const distributors: Ref<DistributorObject[]> = ref([
-  {
-    id: "jo-001",
-    name: "John Mutiso",
-    email: "johnmutiso@localhost.com",
-    phone: "0729291039",
-    rewardAmount: 0,
-  },
-  {
-    id: "jay-002",
-    name: "Jacklin Akoth",
-    email: "jacklineakoth@localhost.com",
-    phone: "0730309392",
-    rewardAmount: 0,
-  },
-  {
-    id: "fa-003",
-    name: "Faustine Smith",
-    email: "faustinesmith@localhost.com",
-    phone: "0748484829",
-    rewardAmount: 0,
-  },
-  {
-    id: "ma-004",
-    name: "Mary Austine",
-    email: "maryaustine@localhost.com",
-    phone: "0739392848",
-    rewardAmount: 0,
-  },
-]);
+// const distributors: Ref<DistributorObject[] | undefined> = ref([
+//   {
+//     id: "jo-001",
+//     name: "John Mutiso",
+//     email: "johnmutiso@localhost.com",
+//     phone: "0729291039",
+//     rewardAmount: 0,
+//   },
+//   {
+//     id: "jay-002",
+//     name: "Jacklin Akoth",
+//     email: "jacklineakoth@localhost.com",
+//     phone: "0730309392",
+//     rewardAmount: 0,
+//   },
+//   {
+//     id: "fa-003",
+//     name: "Faustine Smith",
+//     email: "faustinesmith@localhost.com",
+//     phone: "0748484829",
+//     rewardAmount: 0,
+//   },
+//   {
+//     id: "ma-004",
+//     name: "Mary Austine",
+//     email: "maryaustine@localhost.com",
+//     phone: "0739392848",
+//     rewardAmount: 0,
+//   },
+// ]);
 
-const products: Ref<ProductObject[]> = ref([
-  {
-    id: "yo-120",
-    name: "Yoghurt",
-    price: 120,
-  },
-  {
-    id: "ma-250",
-    name: "Margarine",
-    price: 250,
-  },
-  {
-    id: "pe-340",
-    name: "Peanut Butter",
-    price: 340,
-  },
-  {
-    id: "spa-75",
-    name: "Spaghetti",
-    price: 75,
-  },
-]);
+// const products: Ref<ProductObject[] | undefined> = ref([
+//   {
+//     id: "yo-120",
+//     name: "Yoghurt",
+//     price: 120,
+//   },
+//   {
+//     id: "ma-250",
+//     name: "Margarine",
+//     price: 250,
+//   },
+//   {
+//     id: "pe-340",
+//     name: "Peanut Butter",
+//     price: 340,
+//   },
+//   {
+//     id: "spa-75",
+//     name: "Spaghetti",
+//     price: 75,
+//   },
+// ]);
 
-const selectedDistributor: Ref<DistributorObject> = ref(distributors.value[0]);
-
-watch(selectedDistributor, (value) => {
-  DistributorName.value = value.id;
+const {
+  data: distributors,
+  loading: distributorsLoading,
+  error: distributorsError,
+} = useRequest(distributorsStore.fetchDistributors(), {
+  refreshOnWindowFocus: true,
+  pollingInterval: 60000,
 });
 
-const distributorQuery = ref("");
+console.error(distributorsError);
 
-const filteredDistributors = computed(() =>
-  distributorQuery.value === ""
-    ? distributors
-    : distributors.value.filter((value) =>
-        value.name.toLowerCase().includes(distributorQuery.value.toLowerCase())
-      )
-);
+const {
+  data: products,
+  loading: productsLoading,
+  error: productsError,
+} = useRequest(productsStore.fetchProducts(), {
+  refreshOnWindowFocus: true,
+  pollingInterval: 60000,
+});
 
-const selectedProduct: Ref<ProductObject> = ref(products.value[0]);
+console.error(productsError);
+
+// const selectedDistributor: Ref<DistributorObject> = ref(distributors.value[0]);
+//
+// watch(selectedDistributor, (value) => {
+//   DistributorName.value = value.id;
+// });
+//
+// const distributorQuery = ref("");
+//
+// const filteredDistributors = computed(() =>
+//   distributorQuery.value === ""
+//     ? distributors
+//     : distributors.value.filter((value) =>
+//         value.name.toLowerCase().includes(distributorQuery.value.toLowerCase())
+//       )
+// );
+//
+// const selectedProduct: Ref<ProductObject> = ref(products.value[0]);
 
 const emits = defineEmits<{
   (e: "name-input", input: HTMLElement | null): void;
@@ -292,7 +322,7 @@ const onCreateClick = (value: boolean) => {
 
   if (formIsValid.value) {
     emits("close-modal", value);
-    console.log({ ...createTargetPayload() });
+    targetsStore.createTarget({ ...createTargetPayload() });
   }
 };
 </script>

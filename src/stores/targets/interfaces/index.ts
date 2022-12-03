@@ -16,3 +16,10 @@ export interface UpdateTarget {
   ProductId: string;
   salesTarget: number;
 }
+
+export interface TargetObjectWithDistributorAndProduct {
+  id: string;
+  distributor: string;
+  product: string;
+  salesTarget: number;
+}

@@ -1,13 +1,18 @@
 import { defineStore } from "pinia";
-import { SaleObject, SaleObjectWithConsumerAndDistributor } from "./interfaces";
+import {
+  CreateSale,
+  SaleObject,
+  SaleObjectWithConsumerDistributorAndProduct,
+} from "./interfaces";
 import { useTokenStore } from "../auth/token";
 import { BASE_URL } from "../constants/base-url";
 import { useDistributorsStore } from "../distributors";
 import { useConsumersStore } from "../consumers";
+import { useProductsStore } from "../products";
 
 interface SalesStoreState {
   sales: SaleObject[];
-  salesWithConsumerAndDistributor: SaleObjectWithConsumerAndDistributor[];
+  salesWithConsumerAndDistributor: SaleObjectWithConsumerDistributorAndProduct[];
 }
 
 export const useSalesStore = defineStore({
@@ -64,6 +69,8 @@ export const useSalesStore = defineStore({
 
       const consumersStore = useConsumersStore();
 
+      const productsStore = useProductsStore();
+
       this.salesWithConsumerAndDistributor = await Promise.all(
         this.sales.map(async (value) => {
           const distributor = await distributorsStore.fetchDistributorById(
@@ -74,17 +81,40 @@ export const useSalesStore = defineStore({
             value.ConsumerId
           );
 
-          return {
+          const product = await productsStore.fetchProductById(value.ProductId);
+
+          const temp: SaleObjectWithConsumerDistributorAndProduct = {
             id: value.id,
             consumer: consumer.name,
             distributor: distributor.name,
+            product: product.name,
             quantitySold: value.quantitySold,
             totalAmount: value.totalAmount,
-          } as SaleObjectWithConsumerAndDistributor;
+            soldAt: value.soldAt,
+          };
+
+          return temp;
         })
       );
 
       return this.salesWithConsumerAndDistributor;
+    },
+
+    async createSale(salePayload: CreateSale) {
+      const response = await fetch(`${BASE_URL}/sales`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: await this.getToken(),
+        },
+        body: JSON.stringify(salePayload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw data as Error;
+
+      return data as SaleObject;
     },
   },
 });

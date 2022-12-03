@@ -1,23 +1,20 @@
 import { defineStore } from "pinia";
-import {
-  RewardObject,
-  RewardObjectWithConsumerAndDistributor,
-} from "./interfaces";
+import { RewardObject, RewardObjectWithConsumerAndProduct } from "./interfaces";
 import { useTokenStore } from "../auth/token";
 import { BASE_URL } from "../constants/base-url";
 import { useDistributorsStore } from "../distributors";
-import { useConsumersStore } from "../consumers";
+import { useProductsStore } from "../products";
 
 interface RewardsStoreState {
   rewards: RewardObject[];
-  rewardsWithConsumerAndDistributor: RewardObjectWithConsumerAndDistributor[];
+  rewardsWithConsumerAndProduct: RewardObjectWithConsumerAndProduct[];
 }
 
 export const useRewardsStore = defineStore({
   id: "rewardsStore",
   state: (): RewardsStoreState => ({
     rewards: [],
-    rewardsWithConsumerAndDistributor: [],
+    rewardsWithConsumerAndProduct: [],
   }),
   getters: {},
   actions: {
@@ -60,35 +57,35 @@ export const useRewardsStore = defineStore({
       return data as RewardObject;
     },
 
-    async fetchRewardWithConsumerAndDistributor() {
+    async fetchRewardWithProductAndDistributor() {
       await this.fetchRewards();
 
       const distributorsStore = useDistributorsStore();
 
-      const consumersStore = useConsumersStore();
+      const productsStore = useProductsStore();
 
-      this.rewardsWithConsumerAndDistributor = await Promise.all(
+      this.rewardsWithConsumerAndProduct = await Promise.all(
         this.rewards.map(async (value) => {
           const distributor = await distributorsStore.fetchDistributorById(
             value.DistributorId
           );
 
-          const consumer = await consumersStore.fetchConsumerById(
-            value.ConsumerId
-          );
+          const product = await productsStore.fetchProductById(value.ProductId);
 
-          return {
+          const temp: RewardObjectWithConsumerAndProduct = {
             id: value.id,
-            consumer: consumer.name,
+            product: product.name,
             distributor: distributor.name,
             salesTarget: value.salesTarget,
             dateOfRebate: value.dateOfRebate,
             rebateAmount: value.rebateAmount,
-          } as RewardObjectWithConsumerAndDistributor;
+          };
+
+          return temp;
         })
       );
 
-      return this.rewardsWithConsumerAndDistributor;
+      return this.rewardsWithConsumerAndProduct;
     },
   },
 });

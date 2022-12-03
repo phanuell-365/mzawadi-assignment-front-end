@@ -99,6 +99,9 @@
 import { useField } from "vee-validate";
 import { onMounted, ref, Ref } from "vue";
 import { CreateProduct } from "../../../stores/products/interfaces";
+import { useProductsStore } from "../../../stores/products";
+
+const productsStore = useProductsStore();
 
 const nameValidation = (value: string) => {
   if (!value) return "This is a required field!";
@@ -170,7 +173,7 @@ const onCreateClick = (value: boolean) => {
   validateForm();
   if (formIsValid.value) {
     emits("close-modal", value);
-    console.log({ ...createProductPayload() });
+    productsStore.createProduct({ ...createProductPayload() });
   }
 };
 </script>

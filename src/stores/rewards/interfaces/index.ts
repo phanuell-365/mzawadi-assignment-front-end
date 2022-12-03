@@ -1,15 +1,15 @@
 export interface RewardObject {
   id: string;
-  ConsumerId: string;
+  ProductId: string;
   DistributorId: string;
   salesTarget: number;
   rebateAmount: number;
   dateOfRebate: string;
 }
 
-export interface RewardObjectWithConsumerAndDistributor {
+export interface RewardObjectWithConsumerAndProduct {
   id: string;
-  consumer: string;
+  product: string;
   distributor: string;
   salesTarget: number;
   rebateAmount: number;

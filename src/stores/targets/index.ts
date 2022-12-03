@@ -1,16 +1,25 @@
 import { defineStore } from "pinia";
 import { BASE_URL } from "../constants/base-url";
 import { useTokenStore } from "../auth/token";
-import { CreateTarget, TargetObject, UpdateTarget } from "./interfaces";
+import {
+  CreateTarget,
+  TargetObject,
+  TargetObjectWithDistributorAndProduct,
+  UpdateTarget,
+} from "./interfaces";
+import { useDistributorsStore } from "../distributors";
+import { useProductsStore } from "../products";
 
 interface TargetsStoreState {
   targets: TargetObject[];
+  targetsWithDistributorAndProduct: TargetObjectWithDistributorAndProduct[];
 }
 
 export const useTargetsStore = defineStore({
   id: "targetsStore",
   state: (): TargetsStoreState => ({
     targets: [],
+    targetsWithDistributorAndProduct: [],
   }),
   getters: {},
   actions: {
@@ -35,6 +44,34 @@ export const useTargetsStore = defineStore({
       this.targets = data as TargetObject[];
 
       return this.targets;
+    },
+
+    async fetchTargetWithDistributorAndProduct() {
+      await this.fetchTargets();
+
+      const distributorsStore = useDistributorsStore();
+
+      const productsStore = useProductsStore();
+
+      this.targetsWithDistributorAndProduct = await Promise.all(
+        this.targets.map(async (value) => {
+          const distributor = await distributorsStore.fetchDistributorById(
+            value.DistributorId
+          );
+
+          const product = await productsStore.fetchProductById(value.ProductId);
+
+          const temp: TargetObjectWithDistributorAndProduct = {
+            distributor: distributor.name,
+            id: value.id,
+            product: product.name,
+            salesTarget: value.salesTarget,
+          };
+          return temp;
+        })
+      );
+
+      return this.targetsWithDistributorAndProduct;
     },
 
     async fetchTargetById(targetId: string) {
