@@ -10,3 +10,9 @@ export interface TargetObject {
   ProductId: string;
   salesTarget: number;
 }
+
+export interface UpdateTarget {
+  DistributorId: string;
+  ProductId: string;
+  salesTarget: number;
+}

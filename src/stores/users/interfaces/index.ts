@@ -4,3 +4,17 @@ export interface CreateUser {
   password: string;
   phone: string;
 }
+
+export interface UserObject {
+  id: string;
+  username: string;
+  email: string;
+  phone: string;
+}
+
+export interface UpdateUser {
+  username?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+}

@@ -1,16 +1,16 @@
 import { defineStore } from "pinia";
 import { BASE_URL } from "../constants/base-url";
-import { CreateUser, UpdateUser, UserObject } from "./interfaces";
 import { useTokenStore } from "../auth/token";
+import { CreateTarget, TargetObject, UpdateTarget } from "./interfaces";
 
-interface UsersStoreState {
-  users: UserObject[];
+interface TargetsStoreState {
+  targets: TargetObject[];
 }
 
-export const useUsersStore = defineStore({
-  id: "usersStore",
-  state: (): UsersStoreState => ({
-    users: [],
+export const useTargetsStore = defineStore({
+  id: "targetsStore",
+  state: (): TargetsStoreState => ({
+    targets: [],
   }),
   getters: {},
   actions: {
@@ -19,8 +19,8 @@ export const useUsersStore = defineStore({
 
       return tokenStore.getStoredToken();
     },
-    async fetchUsers() {
-      const response = await fetch(`${BASE_URL}/users`, {
+    async fetchTargets() {
+      const response = await fetch(`${BASE_URL}/targets`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -32,13 +32,13 @@ export const useUsersStore = defineStore({
 
       if (!response.ok) throw data as Error;
 
-      this.users = data as UserObject[];
+      this.targets = data as TargetObject[];
 
-      return this.users;
+      return this.targets;
     },
 
-    async fetchUserById(userId: string) {
-      const response = await fetch(`${BASE_URL}/users/${userId}`, {
+    async fetchTargetById(targetId: string) {
+      const response = await fetch(`${BASE_URL}/targets/${targetId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -50,45 +50,44 @@ export const useUsersStore = defineStore({
 
       if (!response.ok) throw data as Error;
 
-      return data as UserObject;
+      return data as TargetObject;
     },
 
-    async createUser(userPayload: CreateUser) {
-      const response = await fetch(`${BASE_URL}/users`, {
+    async createTarget(targetPayload: CreateTarget) {
+      const response = await fetch(`${BASE_URL}/targets`, {
         method: "POST",
         headers: {
           "Content-type": "application/json",
           Authorization: await this.getToken(),
         },
-        body: JSON.stringify(userPayload),
+        body: JSON.stringify(targetPayload),
       });
 
       const data = await response.json();
 
       if (!response.ok) throw data as Error;
 
-      return data as UserObject;
+      return data as TargetObject;
     },
 
-    async updateUser(updateUserPayload: UpdateUser, userId: string) {
-      const response = await fetch(`${BASE_URL}/users/${userId}`, {
+    async updateTarget(updateTargetPayload: UpdateTarget, targetId: string) {
+      const response = await fetch(`${BASE_URL}/targets/${targetId}`, {
         method: "PATCH",
         headers: {
           "Content-type": "application/json",
           Authorization: await this.getToken(),
         },
-        body: JSON.stringify(updateUserPayload),
+        body: JSON.stringify(updateTargetPayload),
       });
 
       const data = await response.json();
 
       if (!response.ok) throw data as Error;
 
-      return data as UserObject;
+      return data as TargetObject;
     },
-
-    async deleteUser(userId: string) {
-      const response = await fetch(`${BASE_URL}/users/${userId}`, {
+    async deleteTarget(targetId: string) {
+      const response = await fetch(`${BASE_URL}/targets/${targetId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

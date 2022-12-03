@@ -10,6 +10,7 @@
     <div v-if="canAdd">
       <AddResourceButton @click="onClickHandler" />
     </div>
+    <LoginModal />
   </div>
 </template>
 
@@ -18,6 +19,7 @@ import AddResourceButton from "../buttons/AddResourceButton.vue";
 import { computed, reactive, ref, Ref } from "vue";
 import { Routes, useRoutingStore } from "../../stores/routing";
 import { startCase } from "lodash";
+import LoginModal from "../app/users/LoginModal.vue";
 
 const routingStore = useRoutingStore();
 
