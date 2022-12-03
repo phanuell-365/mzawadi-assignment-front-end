@@ -3,3 +3,11 @@ export interface CreateDistributor {
   email: string;
   phone: string;
 }
+
+export interface DistributorObject {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  rewardAmount: number;
+}
