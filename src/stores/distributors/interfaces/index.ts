@@ -11,3 +11,9 @@ export interface DistributorObject {
   email: string;
   rewardAmount: number;
 }
+
+export interface UpdateDistributor {
+  name?: string;
+  email?: string;
+  phone?: string;
+}
