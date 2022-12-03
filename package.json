@@ -14,6 +14,7 @@
     "@rushstack/eslint-patch": "^1.2.0",
     "@vueuse/core": "^9.6.0",
     "flowbite": "^1.5.4",
+    "fuse.js": "^6.6.2",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "pinia": "^2.0.27",

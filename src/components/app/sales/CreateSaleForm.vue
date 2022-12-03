@@ -4,19 +4,19 @@
       <label class="inline-block basis-1/2 p-3">
         <span
           class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
-          >Sales Target</span
+          >Quantity Sold</span
         >
         <input
           id="salesTarget"
-          v-model="salesTarget"
+          v-model="quantitySold"
           :class="{
             'border-pink-600 dark:border-pink-500 focus:border-pink-600 dark:focus:border-pink-500 focus:ring-pink-600 dark:focus:ring-pink-500 caret-pink-600 text-pink-500':
-              (!salesTargetMeta.valid && salesTargetMeta.validated) ||
-              (!salesTargetMeta.validated && !formIsValid),
+              (!quantitySoldMeta.valid && quantitySoldMeta.validated) ||
+              (!quantitySoldMeta.validated && !formIsValid),
             'border-stone-300 dark:border-stone-50 focus:border-sky-500 dark:focus:border-sky-300 focus:ring-sky-500 dark:focus:ring-sky-200 dark:text-stone-50 caret-sky-200':
               !(
-                (!salesTargetMeta.valid && salesTargetMeta.validated) ||
-                (!salesTargetMeta.validated && !formIsValid)
+                (!quantitySoldMeta.valid && quantitySoldMeta.validated) ||
+                (!quantitySoldMeta.validated && !formIsValid)
               ),
           }"
           class="peer block bg-white dark:bg-zinc-600 w-full border rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-1 sm:text-sm"
@@ -25,18 +25,19 @@
           type="tel"
         />
         <small
-          v-if="!salesTargetMeta.valid && salesTargetMeta.validated"
+          v-if="!quantitySoldMeta.valid && quantitySoldMeta.validated"
           class="mt-2 block text-pink-600 dark:text-pink-500 text-sm"
         >
-          {{ salesTargetErrorMessage }}
+          {{ quantitySoldErrorMessage }}
         </small>
         <small
-          v-else-if="!salesTargetMeta.validated && !formIsValid"
+          v-else-if="!quantitySoldMeta.validated && !formIsValid"
           class="mt-2 block text-pink-600 dark:text-pink-500 text-sm"
         >
           This is a required field
         </small>
       </label>
+
       <label class="inline-block basis-1/2 p-3">
         <span
           class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
@@ -44,7 +45,7 @@
         >
         <select
           id="distributor"
-          v-model="DistributorName"
+          v-model="distributorId"
           :class="{
             'border-pink-600 dark:border-pink-500 focus:border-pink-600 dark:focus:border-pink-500 focus:ring-pink-600 dark:focus:ring-pink-500 caret-pink-600 text-pink-500':
               (!distributorIdMeta.valid && distributorIdMeta.validated) ||
@@ -80,6 +81,7 @@
           This is a required field
         </small>
       </label>
+
       <label class="inline-block basis-1/2 p-3">
         <span
           class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
@@ -87,7 +89,7 @@
         >
         <select
           id="product"
-          v-model="ProductName"
+          v-model="productId"
           :class="{
             'border-pink-600 dark:border-pink-500 focus:border-pink-600 dark:focus:border-pink-500 focus:ring-pink-600 dark:focus:ring-pink-500 caret-pink-600 text-pink-500':
               (!productIdMeta.valid && productIdMeta.validated) ||
@@ -123,6 +125,51 @@
           This is a required field
         </small>
       </label>
+
+      <!--  create another input for the consumer    -->
+      <label class="inline-block basis-1/2 p-3">
+        <span
+          class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          >Consumer</span
+        >
+        <select
+          id="consumer"
+          v-model="consumerId"
+          :class="{
+            'border-pink-600 dark:border-pink-500 focus:border-pink-600 dark:focus:border-pink-500 focus:ring-pink-600 dark:focus:ring-pink-500 caret-pink-600 text-pink-500':
+              (!consumerIdMeta.valid && consumerIdMeta.validated) ||
+              (!consumerIdMeta.validated && !formIsValid),
+            'border-stone-300 dark:border-stone-50 focus:border-sky-500 dark:focus:border-sky-300 focus:ring-sky-500 dark:focus:ring-sky-200 dark:text-stone-50 caret-sky-200':
+              !(
+                (!consumerIdMeta.valid && consumerIdMeta.validated) ||
+                (!consumerIdMeta.validated && !formIsValid)
+              ),
+          }"
+          class="peer block bg-white dark:bg-zinc-600 w-full border rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-1 sm:text-sm"
+          name="consumer"
+        >
+          <option
+            v-for="consumerObject in consumers"
+            :key="consumerObject.id"
+            :value="consumerObject.id"
+            class="py-2"
+          >
+            {{ consumerObject.name }}
+          </option>
+        </select>
+        <small
+          v-if="!consumerIdMeta.valid && consumerIdMeta.validated"
+          class="mt-2 block text-pink-600 dark:text-pink-500 text-sm"
+        >
+          {{ consumerIdErrorMessage }}
+        </small>
+        <small
+          v-else-if="!consumerIdMeta.validated && !formIsValid"
+          class="mt-2 block text-pink-600 dark:text-pink-500 text-sm"
+        >
+          This is a required field
+        </small>
+      </label>
     </div>
 
     <div class="py-3 flex justify-end">
@@ -145,31 +192,40 @@
 <script lang="ts" setup>
 import { useField } from "vee-validate";
 import { onMounted, ref, Ref } from "vue";
-import { CreateTarget } from "../../../stores/targets/interfaces";
+import { CreateSale } from "../../../stores/sales/interfaces";
+import { useSalesStore } from "../../../stores/sales";
 import { useRequest } from "vue-request";
 import { useDistributorsStore } from "../../../stores/distributors";
 import { useProductsStore } from "../../../stores/products";
-import { useTargetsStore } from "../../../stores/targets";
+import { useConsumersStore } from "../../../stores/consumers";
+
+const salesStore = useSalesStore();
 
 const distributorsStore = useDistributorsStore();
 
 const productsStore = useProductsStore();
 
-const targetsStore = useTargetsStore();
+const consumersStore = useConsumersStore();
 
 const {
-  value: DistributorName,
+  value: distributorId,
   errorMessage: distributorIdErrorMessage,
   meta: distributorIdMeta,
-} = useField("DistributorId");
+} = useField("distributorId");
 
 const {
-  value: ProductName,
+  value: productId,
   errorMessage: productIdErrorMessage,
   meta: productIdMeta,
 } = useField("productId");
 
-const salesTargetValidation = (value: string) => {
+const {
+  value: consumerId,
+  errorMessage: consumerIdErrorMessage,
+  meta: consumerIdMeta,
+} = useField("consumerId");
+
+const quantitySoldValidation = (value: string) => {
   if (!value) return "This is a required field!";
 
   if (!/^\d+$/.test(value)) {
@@ -186,10 +242,10 @@ const salesTargetValidation = (value: string) => {
 };
 
 const {
-  value: salesTarget,
-  errorMessage: salesTargetErrorMessage,
-  meta: salesTargetMeta,
-} = useField("salesTarget", salesTargetValidation);
+  value: quantitySold,
+  errorMessage: quantitySoldErrorMessage,
+  meta: quantitySoldMeta,
+} = useField("quantitySold", quantitySoldValidation);
 
 const {
   data: distributors,
@@ -213,23 +269,16 @@ const {
 
 console.error(productsError);
 
-// const selectedDistributor: Ref<DistributorObject> = ref(distributors.value[0]);
-//
-// watch(selectedDistributor, (value) => {
-//   DistributorName.value = value.id;
-// });
-//
-// const distributorQuery = ref("");
-//
-// const filteredDistributors = computed(() =>
-//   distributorQuery.value === ""
-//     ? distributors
-//     : distributors.value.filter((value) =>
-//         value.name.toLowerCase().includes(distributorQuery.value.toLowerCase())
-//       )
-// );
-//
-// const selectedProduct: Ref<ProductObject> = ref(products.value[0]);
+const {
+  data: consumers,
+  loading: consumersLoading,
+  error: consumersError,
+} = useRequest(consumersStore.fetchConsumers(), {
+  refreshOnWindowFocus: true,
+  pollingInterval: 60000,
+});
+
+console.error(consumersError);
 
 const emits = defineEmits<{
   (e: "name-input", input: HTMLElement | null): void;
@@ -250,14 +299,15 @@ const onCancelClick = (value: boolean) => {
 
 const validateForm = () => {
   formIsValid.value =
-    distributorIdMeta.valid && productIdMeta.valid && salesTargetMeta.valid;
+    distributorIdMeta.valid && productIdMeta.valid && quantitySoldMeta.valid;
 };
 
-const createTargetPayload = () => {
-  const payload: CreateTarget = {
-    DistributorId: DistributorName.value as string,
-    ProductId: ProductName.value as string,
-    salesTarget: Number.parseInt(salesTarget.value),
+const createSalesPayload = () => {
+  const payload: CreateSale = {
+    DistributorId: distributorId.value as string,
+    ProductId: productId.value as string,
+    quantitySold: Number.parseInt(quantitySold.value),
+    ConsumerId: consumerId.value as string,
   };
 
   return payload;
@@ -265,10 +315,9 @@ const createTargetPayload = () => {
 
 const onCreateClick = (value: boolean) => {
   validateForm();
-
   if (formIsValid.value) {
     emits("close-modal", value);
-    targetsStore.createTarget({ ...createTargetPayload() });
+    salesStore.createSale({ ...createSalesPayload() });
   }
 };
 </script>

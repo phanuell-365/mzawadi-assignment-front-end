@@ -46,7 +46,6 @@ const onNameInputHandler = (input: HTMLInputElement) => {
 };
 
 const onClose = (value: boolean) => {
-  console.log("the value received", value);
   show.value = value;
 };
 </script>

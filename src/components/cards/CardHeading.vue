@@ -37,6 +37,7 @@ const thatCanAdd = ref([
   "consumer",
   "user",
   "product",
+  "sale",
 ]);
 
 const canAdd = computed(() =>
