@@ -4,6 +4,7 @@ import { useTokenStore } from "../auth/token";
 import { BASE_URL } from "../constants/base-url";
 import { useDistributorsStore } from "../distributors";
 import { useProductsStore } from "../products";
+import moment from "moment";
 
 interface RewardsStoreState {
   rewards: RewardObject[];
@@ -16,7 +17,22 @@ export const useRewardsStore = defineStore({
     rewards: [],
     rewardsWithConsumerAndProduct: [],
   }),
-  getters: {},
+  getters: {
+    getRewardsAttributes: () => [
+      "id",
+      "ProductId",
+      "DistributorId",
+      "rebateAmount",
+      "dateOfRebate",
+    ],
+    getRewardsAttributesWithConsumerAndProduct: () => [
+      "id",
+      "product",
+      "distributor",
+      "rebateAmount",
+      "dateOfRebate",
+    ],
+  },
   actions: {
     async getToken() {
       const tokenStore = useTokenStore();
@@ -57,7 +73,7 @@ export const useRewardsStore = defineStore({
       return data as RewardObject;
     },
 
-    async fetchRewardWithProductAndDistributor() {
+    async fetchRewardsWithProductAndDistributor() {
       await this.fetchRewards();
 
       const distributorsStore = useDistributorsStore();
@@ -76,9 +92,8 @@ export const useRewardsStore = defineStore({
             id: value.id,
             product: product.name,
             distributor: distributor.name,
-            salesTarget: value.salesTarget,
-            dateOfRebate: value.dateOfRebate,
             rebateAmount: value.rebateAmount,
+            dateOfRebate: moment(value.dateOfRebate).format("DD/MM/YYYY"),
           };
 
           return temp;

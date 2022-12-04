@@ -2,6 +2,20 @@
   <div>
     <CardHeading @add-click="onAddClickHandler" />
   </div>
+  <!-- Main card for user with group button as edit -->
+  <MainCard>
+    <template v-if="!usersIsLoading">
+      <SearchContainer
+        :item-attributes="usersStore.getUsersAttributes"
+        :records="users"
+        :search-keys="['name', 'email', 'role']"
+      >
+        <template #edit>
+          <GroupButton type="edit" />
+        </template>
+      </SearchContainer>
+    </template>
+  </MainCard>
   <div>
     <ModalContainer
       :initial-focus="initialFocusElement"
@@ -25,6 +39,21 @@ import CardHeading from "../components/cards/CardHeading.vue";
 import ModalContainer from "../components/modals/create/ModalContainer.vue";
 import CreateUserForm from "../components/app/users/CreateUserForm.vue";
 import { ref, Ref } from "vue";
+import MainCard from "../components/cards/MainCard.vue";
+import SearchContainer from "../components/searching/SearchContainer.vue";
+import { useUsersStore } from "../stores/users";
+import { useRequest } from "vue-request";
+import GroupButton from "../components/buttons/GroupButton.vue";
+
+const usersStore = useUsersStore();
+
+const { data: users, loading: usersIsLoading } = useRequest(
+  usersStore.fetchUsers(),
+  {
+    refreshOnWindowFocus: true,
+    pollingInterval: 60000,
+  }
+);
 
 const routingStore = useRoutingStore();
 

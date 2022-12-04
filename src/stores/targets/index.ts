@@ -21,7 +21,20 @@ export const useTargetsStore = defineStore({
     targets: [],
     targetsWithDistributorAndProduct: [],
   }),
-  getters: {},
+  getters: {
+    getTargetsAttributes: () => [
+      "id",
+      "DistributorId",
+      "ProductId",
+      "salesTarget",
+    ],
+    getTargetsAttributesWithDistributorAndProduct: () => [
+      "id",
+      "distributor",
+      "product",
+      "salesTarget",
+    ],
+  },
   actions: {
     async getToken() {
       const tokenStore = useTokenStore();
@@ -62,11 +75,12 @@ export const useTargetsStore = defineStore({
           const product = await productsStore.fetchProductById(value.ProductId);
 
           const temp: TargetObjectWithDistributorAndProduct = {
-            distributor: distributor.name,
             id: value.id,
+            distributor: distributor.name,
             product: product.name,
             salesTarget: value.salesTarget,
           };
+          console.log(temp);
           return temp;
         })
       );

@@ -12,7 +12,16 @@ export const useConsumersStore = defineStore({
   state: (): ConsumersStoreState => ({
     consumers: [],
   }),
-  getters: {},
+  getters: {
+    getConsumersAttributes: () => [
+      "id",
+      "name",
+      "email",
+      "phone",
+      "points",
+      "valueOfPoints",
+    ],
+  },
   actions: {
     async getToken() {
       const tokenStore = useTokenStore();

@@ -9,6 +9,7 @@ import { BASE_URL } from "../constants/base-url";
 import { useDistributorsStore } from "../distributors";
 import { useConsumersStore } from "../consumers";
 import { useProductsStore } from "../products";
+import moment from "moment";
 
 interface SalesStoreState {
   sales: SaleObject[];
@@ -21,7 +22,26 @@ export const useSalesStore = defineStore({
     sales: [],
     salesWithConsumerAndDistributor: [],
   }),
-  getters: {},
+  getters: {
+    getSalesAttributes: () => [
+      "id",
+      "ConsumerId",
+      "DistributorId",
+      "ProductId",
+      "quantitySold",
+      "totalAmount",
+      "soldAt",
+    ],
+    getSalesAttributesWithConsumerDistributorAndProduct: () => [
+      "id",
+      "consumer",
+      "distributor",
+      "product",
+      "quantitySold",
+      "totalAmount",
+      "soldAt",
+    ],
+  },
   actions: {
     async getToken() {
       const tokenStore = useTokenStore();
@@ -90,7 +110,7 @@ export const useSalesStore = defineStore({
             product: product.name,
             quantitySold: value.quantitySold,
             totalAmount: value.totalAmount,
-            soldAt: value.soldAt,
+            soldAt: moment(value.soldAt).format("MMMM Do YYYY h:mm:ss a"),
           };
 
           return temp;

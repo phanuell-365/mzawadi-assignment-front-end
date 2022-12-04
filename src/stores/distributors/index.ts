@@ -16,7 +16,15 @@ export const useDistributorsStore = defineStore({
   state: (): DistributorsStoreState => ({
     distributors: [],
   }),
-  getters: {},
+  getters: {
+    getDistributorAttributes: () => [
+      "id",
+      "name",
+      "email",
+      "phone",
+      "rebateAmount",
+    ],
+  },
   actions: {
     async getToken() {
       const tokenStore = useTokenStore();

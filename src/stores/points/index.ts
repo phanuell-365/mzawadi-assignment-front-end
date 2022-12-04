@@ -24,7 +24,24 @@ export const usePointsStore = defineStore({
     pointsWithConsumerProductAndDistributorData: [],
     pointsWithConsumerProductAndDistributorDataId: [],
   }),
-  getters: {},
+  getters: {
+    getPointsAttributes: () => [
+      "id",
+      "ConsumerId",
+      "DistributorId",
+      "ProductId",
+      "points",
+      "valueOfPoints",
+    ],
+    getPointsAttributesWithConsumerProductAndDistributor: () => [
+      "id",
+      "consumer",
+      "distributor",
+      "product",
+      "points",
+      "valueOfPoints",
+    ],
+  },
   actions: {
     async getToken() {
       const tokenStore = useTokenStore();
@@ -75,10 +92,10 @@ export const usePointsStore = defineStore({
           const product = await productsStore.fetchProductById(sale.ProductId);
 
           const temp: PointObjectWithConsumerProductAndDistributorId = {
-            ProductId: product.id,
             id: value.id,
-            DistributorId: distributor.id,
             ConsumerId: consumer.id,
+            DistributorId: distributor.id,
+            ProductId: product.id,
             points: value.points,
             valueOfPoints: value.valueOfPoints,
           };
@@ -115,10 +132,10 @@ export const usePointsStore = defineStore({
             );
 
             const temp: PointObjectWithConsumerProductAndDistributor = {
-              product: product.name,
               id: value.id,
-              distributor: distributor.name,
               consumer: consumer.name,
+              distributor: distributor.name,
+              product: product.name,
               points: value.points,
               valueOfPoints: value.valueOfPoints,
             };

@@ -12,7 +12,9 @@ export const useProductsStore = defineStore({
   state: (): ProductsStoreState => ({
     products: [],
   }),
-  getters: {},
+  getters: {
+    getProductsAttributes: () => ["id", "name", "price"],
+  },
   actions: {
     async getToken() {
       const tokenStore = useTokenStore();

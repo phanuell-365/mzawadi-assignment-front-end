@@ -2,6 +2,21 @@
   <div>
     <CardHeading @add-click="onAddClickHandler" />
   </div>
+  <MainCard>
+    <template v-if="!salesIsLoading">
+      <SearchContainer
+        :item-attributes="
+          salesStore.getSalesAttributesWithConsumerDistributorAndProduct
+        "
+        :records="sales"
+        :search-keys="['consumer', 'product', 'distributor']"
+      >
+        <template #edit>
+          <GroupButton type="edit" />
+        </template>
+      </SearchContainer>
+    </template>
+  </MainCard>
   <div>
     <ModalContainer
       :initial-focus="initialFocusElement"
@@ -25,8 +40,23 @@ import CardHeading from "../components/cards/CardHeading.vue";
 import ModalContainer from "../components/modals/create/ModalContainer.vue";
 import CreateSaleForm from "../components/app/sales/CreateSaleForm.vue";
 import { ref, Ref } from "vue";
+import MainCard from "../components/cards/MainCard.vue";
+import SearchContainer from "../components/searching/SearchContainer.vue";
+import { useSalesStore } from "../stores/sales";
+import { useRequest } from "vue-request";
+import GroupButton from "../components/buttons/GroupButton.vue";
 
 const routingStore = useRoutingStore();
+
+const salesStore = useSalesStore();
+
+const { data: sales, loading: salesIsLoading } = useRequest(
+  salesStore.fetchSaleWithConsumerAndDistributor(),
+  {
+    refreshOnWindowFocus: true,
+    pollingInterval: 60000,
+  }
+);
 
 const route = useRoute();
 

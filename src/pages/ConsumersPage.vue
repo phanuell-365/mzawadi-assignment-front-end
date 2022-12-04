@@ -3,7 +3,17 @@
     <CardHeading @add-click="onAddClickHandler" />
   </div>
   <MainCard>
-    <AllConsumers />
+    <!--    <AllConsumers />-->
+    <SearchContainer
+      v-if="!consumersIsLoading"
+      :item-attributes="consumersStore.getConsumersAttributes"
+      :records="consumers"
+      :search-keys="['name', 'email']"
+    >
+      <template #edit>
+        <GroupButton type="view" />
+      </template>
+    </SearchContainer>
   </MainCard>
   <div>
     <ModalContainer
@@ -23,13 +33,27 @@
 
 <script lang="ts" setup>
 import MainCard from "../components/cards/MainCard.vue";
-import AllConsumers from "../components/app/consumers/AllConsumers.vue";
+// import AllConsumers from "../components/app/consumers/AllConsumers.vue";
 import { useRoutingStore } from "../stores/routing";
 import { useRoute } from "vue-router";
 import CardHeading from "../components/cards/CardHeading.vue";
 import { Ref, ref } from "vue";
 import ModalContainer from "../components/modals/create/ModalContainer.vue";
 import CreateConsumerForm from "../components/app/consumers/CreateConsumerForm.vue";
+import { useConsumersStore } from "../stores/consumers";
+import { useRequest } from "vue-request";
+import SearchContainer from "../components/searching/SearchContainer.vue";
+import GroupButton from "../components/buttons/GroupButton.vue";
+
+const consumersStore = useConsumersStore();
+
+const { data: consumers, loading: consumersIsLoading } = useRequest(
+  consumersStore.fetchConsumers(),
+  {
+    refreshOnWindowFocus: true,
+    pollingInterval: 60000,
+  }
+);
 
 const routingStore = useRoutingStore();
 

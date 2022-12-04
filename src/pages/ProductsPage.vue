@@ -2,6 +2,20 @@
   <div>
     <CardHeading @add-click="onAddClickHandler" />
   </div>
+  <!-- Main heading for products -->
+  <MainCard>
+    <template v-if="!productsIsLoading">
+      <SearchContainer
+        :item-attributes="productsStore.getProductsAttributes"
+        :records="products"
+        :search-keys="['name', 'price']"
+      >
+        <template #edit>
+          <GroupButton type="view" />
+        </template>
+      </SearchContainer>
+    </template>
+  </MainCard>
   <div>
     <ModalContainer
       :initial-focus="initialFocusElement"
@@ -25,6 +39,21 @@ import { ref, Ref } from "vue";
 import CardHeading from "../components/cards/CardHeading.vue";
 import ModalContainer from "../components/modals/create/ModalContainer.vue";
 import CreateProductForm from "../components/app/products/CreateProductForm.vue";
+import { useProductsStore } from "../stores/products";
+import { useRequest } from "vue-request";
+import GroupButton from "../components/buttons/GroupButton.vue";
+import SearchContainer from "../components/searching/SearchContainer.vue";
+import MainCard from "../components/cards/MainCard.vue";
+
+const productsStore = useProductsStore();
+
+const { data: products, loading: productsIsLoading } = useRequest(
+  productsStore.fetchProducts(),
+  {
+    refreshOnWindowFocus: true,
+    pollingInterval: 60000,
+  }
+);
 
 const routingStore = useRoutingStore();
 

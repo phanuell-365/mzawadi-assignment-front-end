@@ -12,7 +12,9 @@ export const useUsersStore = defineStore({
   state: (): UsersStoreState => ({
     users: [],
   }),
-  getters: {},
+  getters: {
+    getUsersAttributes: () => ["id", "name", "email", "phone", "role"],
+  },
   actions: {
     async getToken() {
       const tokenStore = useTokenStore();

@@ -9,6 +9,8 @@ export interface ConsumerObject {
   name: string;
   email: string;
   phone: string;
+  points: number;
+  valueOfPoints: number;
 }
 
 export interface UpdateConsumer {

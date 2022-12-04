@@ -2,6 +2,18 @@
   <div>
     <CardHeading @add-click="onAddClickHandler" />
   </div>
+  <MainCard>
+    <SearchContainer
+      v-if="!distributorsIsLoading"
+      :item-attributes="distributorsStore.getDistributorAttributes"
+      :records="distributors"
+      :search-keys="['name', 'email']"
+    >
+      <template #edit>
+        <GroupButton type="view" />
+      </template>
+    </SearchContainer>
+  </MainCard>
   <div>
     <ModalContainer
       :initial-focus="initialFocusElement"
@@ -25,6 +37,21 @@ import { ref, Ref } from "vue";
 import CardHeading from "../components/cards/CardHeading.vue";
 import ModalContainer from "../components/modals/create/ModalContainer.vue";
 import CreateDistributorForm from "../components/app/distributors/CreateDistributorForm.vue";
+import MainCard from "../components/cards/MainCard.vue";
+import SearchContainer from "../components/searching/SearchContainer.vue";
+import { useRequest } from "vue-request";
+import { useDistributorsStore } from "../stores/distributors";
+import GroupButton from "../components/buttons/GroupButton.vue";
+
+const distributorsStore = useDistributorsStore();
+
+const { data: distributors, loading: distributorsIsLoading } = useRequest(
+  distributorsStore.fetchDistributors(),
+  {
+    refreshOnWindowFocus: true,
+    pollingInterval: 60000,
+  }
+);
 
 const routingStore = useRoutingStore();
 
@@ -46,7 +73,6 @@ const onNameInputHandler = (input: HTMLInputElement) => {
 };
 
 const onClose = (value: boolean) => {
-  console.log("the value received", value);
   show.value = value;
 };
 </script>
