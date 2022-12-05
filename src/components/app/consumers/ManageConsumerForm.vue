@@ -110,6 +110,38 @@
           This is a required field
         </small>
       </label>
+
+      <label class="inline-block basis-1/2 p-3">
+        <span
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          >Points</span
+        >
+        <input
+          id="points"
+          :value="points"
+          class="peer block bg-white dark:bg-zinc-500 dark:text-stone-100 w-full border rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-1 sm:text-sm disabled:bg-stone-100 disabled:text-zinc-500 disabled:border-zinc-300 disabled:shadow-none"
+          disabled
+          name="points"
+          readonly
+          type="number"
+        />
+      </label>
+
+      <label class="inline-block basis-1/2 p-3">
+        <span
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          >Value of Points</span
+        >
+        <input
+          id="points"
+          :value="valueOfPoints"
+          class="peer block bg-white dark:bg-zinc-500 dark:text-stone-100 w-full border rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-1 sm:text-sm disabled:bg-stone-100 disabled:text-zinc-500 disabled:border-zinc-300 disabled:shadow-none"
+          disabled
+          name="points"
+          readonly
+          type="number"
+        />
+      </label>
     </div>
 
     <div class="py-3 flex justify-end">
@@ -199,6 +231,9 @@ const {
   meta: phoneMeta,
 } = useField("phone", phoneValidation);
 
+const points = ref(0);
+const valueOfPoints = ref(0);
+
 try {
   consumer.value = await consumersStore.fetchConsumerById(props.consumerId);
 
@@ -207,6 +242,8 @@ try {
   name.value = consumer.value?.name;
   email.value = consumer.value?.email;
   phone.value = consumer.value?.phone;
+  points.value = consumer.value?.points;
+  valueOfPoints.value = consumer.value?.valueOfPoints;
 } catch (error: any) {
   console.error(error);
 }
