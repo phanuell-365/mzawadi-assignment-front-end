@@ -1,16 +1,22 @@
 <template>
-  <div class="flex justify-between items-center">
-    <div class="heading my-3 pb-3 pt-5">
-      <h2
-        class="text-3xl text-stone-600 dark:text-stone-50 font-bold antialiased"
-      >
-        {{ startCase(routeInfo.description) }}s
-      </h2>
+  <div class="pt-5">
+    <div
+      class="mt-2 mb-5 py-5 mx-3 px-6 rounded-lg shadow bg-white dark:bg-zinc-700"
+    >
+      <div class="flex justify-between items-center">
+        <div class="heading">
+          <h2
+            class="text-3xl text-stone-600 dark:text-stone-50 font-bold antialiased"
+          >
+            {{ startCase(routeInfo.description) }}s
+          </h2>
+        </div>
+        <div v-if="canAdd">
+          <AddResourceButton @click="onClickHandler" />
+        </div>
+        <LoginModal />
+      </div>
     </div>
-    <div v-if="canAdd">
-      <AddResourceButton @click="onClickHandler" />
-    </div>
-    <LoginModal />
   </div>
 </template>
 

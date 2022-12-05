@@ -80,12 +80,30 @@ const options = reactive({
 
 const filteredRecords = ref(props.records);
 
+// watch(
+//   () => [props.records, selectedKey.value],
+//   ([records, selectedKey]) => {
+//     options.keys = [selectedKey];
+//     const fuse = new Fuse(records, options);
+//     filteredRecords.value = fuse.search(query.value);
+//   },
+//   { immediate: true }
+// );
+
+// watch for the selectedKey
+watch(selectedKey, (selectedKey) => {
+  options.keys = [selectedKey];
+  // console.log(selectedKey);
+  // const fuse = new Fuse(props.records, options);
+  // filteredRecords.value = fuse.search(query.value);
+});
+
 watch(query, (value) => {
   const fuse = new Fuse(props.records, options);
   const result = fuse.search(value.toLowerCase()).map((value1) => value1.item);
   filteredRecords.value = value === "" ? props.records : result;
 });
-//
+
 //
 //
 // const filteredRecords = computed(() => {

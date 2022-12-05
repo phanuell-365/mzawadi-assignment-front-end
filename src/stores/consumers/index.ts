@@ -13,6 +13,7 @@ export const useConsumersStore = defineStore({
     consumers: [],
   }),
   getters: {
+    getConsumers: (state): ConsumerObject[] => state.consumers,
     getConsumersAttributes: () => [
       "id",
       "name",

@@ -3,7 +3,7 @@
     <div class="md:flex flex-row flex-wrap mx-3">
       <label class="inline-block basis-1/2 p-3">
         <span
-          class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
           >Name</span
         >
         <input
@@ -23,7 +23,6 @@
           autocomplete="off"
           class="peer block bg-white dark:bg-zinc-600 w-full border rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-1 sm:text-sm"
           name="name"
-          required
           type="text"
         />
         <small
@@ -42,7 +41,7 @@
 
       <label class="inline-block basis-1/2 p-3">
         <span
-          class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
           >Phone</span
         >
         <input
@@ -60,7 +59,6 @@
           }"
           class="peer block bg-white dark:bg-zinc-600 w-full border rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-1 sm:text-sm"
           name="phone"
-          required
           type="tel"
         />
         <small
@@ -79,7 +77,7 @@
 
       <label class="inline-block basis-1/2 p-3">
         <span
-          class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
           >Email</span
         >
         <input
@@ -97,7 +95,6 @@
           }"
           class="peer block bg-white dark:bg-zinc-600 w-full border rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-1 sm:text-sm"
           name="email"
-          required
           type="email"
         />
         <small
@@ -124,24 +121,35 @@
       </button>
       <button
         class="py-1 px-4 m-2 rounded-full bg-sky-400 focus:ring focus:ring-sky-200 active:ring-sky-300 hover:bg-sky-600 hover:text-white focus:outline-none transition ease-in-out delay-150 hover:-translate-y-0.5 duration-200"
-        @click="onCreateClick(false)"
+        @click="updateConsumer(false)"
       >
-        Create
+        Update
       </button>
     </div>
   </form>
 </template>
 
 <script lang="ts" setup>
-import { useField } from "vee-validate";
-import { onMounted, ref, Ref } from "vue";
-import { CreateConsumer } from "../../../stores/consumers/interfaces";
 import { useConsumersStore } from "../../../stores/consumers";
+import { onMounted, Ref, ref } from "vue";
+import {
+  ConsumerObject,
+  CreateConsumer,
+} from "../../../stores/consumers/interfaces";
+import { useField } from "vee-validate";
+
+interface ManageConsumersFormProps {
+  consumerId: string;
+}
+
+const props = defineProps<ManageConsumersFormProps>();
 
 const consumersStore = useConsumersStore();
 
+const consumer: Ref<ConsumerObject | undefined> = ref();
+
 const nameValidation = (value: string) => {
-  if (!value) return "This is a required field!";
+  // if (!value) return "This is a required field!";
 
   return true;
 };
@@ -153,7 +161,7 @@ const {
 } = useField("name", nameValidation);
 
 const emailValidation = (value: string) => {
-  if (!value) return "This is a required field!";
+  // if (!value) return "This is a required field!";
 
   if (
     !/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
@@ -174,7 +182,7 @@ const {
 } = useField("email", emailValidation);
 
 const phoneValidation = (value: string) => {
-  if (!value) return "This is a required field!";
+  // if (!value) return "This is a required field!";
 
   if (value.length < 10)
     return "The phone number should contain numbers not less than 10!";
@@ -191,12 +199,21 @@ const {
   meta: phoneMeta,
 } = useField("phone", phoneValidation);
 
-// emit a ref to the name element for focusing
+try {
+  consumer.value = await consumersStore.fetchConsumerById(props.consumerId);
+
+  // assign the values to the form controls
+
+  name.value = consumer.value?.name;
+  email.value = consumer.value?.email;
+  phone.value = consumer.value?.phone;
+} catch (error: any) {
+  console.error(error);
+}
 
 const emits = defineEmits<{
   (e: "name-input", input: HTMLElement | null): void;
   (e: "close-modal", value: boolean): void;
-  (e: "add-consumer"): void;
 }>();
 
 const nameInputRef: Ref<HTMLInputElement | null> = ref(null);
@@ -225,10 +242,13 @@ const createConsumerPayload = () => {
   return payload;
 };
 
-const onCreateClick = async (value: boolean) => {
+const updateConsumer = async (value: boolean) => {
   validateForm();
   if (formIsValid.value) {
-    await consumersStore.createConsumer({ ...createConsumerPayload() });
+    await consumersStore.updateConsumer(
+      { ...createConsumerPayload() },
+      props.consumerId
+    );
     emits("close-modal", value);
   }
 };
