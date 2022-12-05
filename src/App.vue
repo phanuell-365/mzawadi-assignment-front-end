@@ -14,7 +14,12 @@ const toggleDark = useToggle(isDark);
         <SidebarContainer />
       </template>
       <template #pages>
-        <RouterView></RouterView>
+        <Suspense>
+          <template #default>
+            <RouterView></RouterView>
+          </template>
+          <template #fallback></template>
+        </Suspense>
       </template>
     </SidebarLayout>
   </div>
