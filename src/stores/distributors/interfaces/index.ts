@@ -9,7 +9,7 @@ export interface DistributorObject {
   name: string;
   phone: string;
   email: string;
-  rewardAmount: number;
+  rebateAmount: number;
 }
 
 export interface UpdateDistributor {

@@ -3,7 +3,7 @@
     <div class="md:flex flex-row flex-wrap mx-3">
       <label class="inline-block basis-1/2 p-3">
         <span
-          class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
           >Name</span
         >
         <input
@@ -42,7 +42,7 @@
 
       <label class="inline-block basis-1/2 p-3">
         <span
-          class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
           >Phone</span
         >
         <input
@@ -79,7 +79,7 @@
 
       <label class="inline-block basis-1/2 p-3">
         <span
-          class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
           >Email</span
         >
         <input
@@ -113,6 +113,22 @@
           This is a required field
         </small>
       </label>
+
+      <label class="inline-block basis-1/2 p-3">
+        <span
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          >Rebate Amount</span
+        >
+        <input
+          id="rebateAmount"
+          :value="rebateAmount"
+          class="peer block bg-white dark:bg-zinc-500 dark:text-stone-100 w-full border rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-1 sm:text-sm disabled:bg-stone-100 disabled:text-zinc-500 disabled:border-zinc-300 disabled:shadow-none"
+          disabled
+          name="rebateAmount"
+          readonly
+          type="number"
+        />
+      </label>
     </div>
 
     <div class="py-3 flex justify-end">
@@ -124,24 +140,35 @@
       </button>
       <button
         class="py-1 px-4 m-2 rounded-full bg-sky-400 focus:ring focus:ring-sky-200 active:ring-sky-300 hover:bg-sky-600 hover:text-white focus:outline-none transition ease-in-out delay-150 hover:-translate-y-0.5 duration-200"
-        @click="onCreateClick(false)"
+        @click="updateDistributor(false)"
       >
-        Create
+        Update
       </button>
     </div>
   </form>
 </template>
 
 <script lang="ts" setup>
-import { useField } from "vee-validate";
+import { useDistributorsStore } from "../../../stores/distributors";
 import { onMounted, ref, Ref } from "vue";
-import { CreateConsumer } from "../../../stores/consumers/interfaces";
-import { useConsumersStore } from "../../../stores/consumers";
+import {
+  CreateDistributor,
+  DistributorObject,
+} from "../../../stores/distributors/interfaces";
+import { useField } from "vee-validate";
 
-const consumersStore = useConsumersStore();
+interface ManageDistributorsFormProps {
+  distributorId: string;
+}
+
+const props = defineProps<ManageDistributorsFormProps>();
+
+const distributorsStore = useDistributorsStore();
+
+const distributor: Ref<DistributorObject | undefined> = ref();
 
 const nameValidation = (value: string) => {
-  if (!value) return "This is a required field!";
+  // if (!value) return "This is a required field!";
 
   return true;
 };
@@ -153,7 +180,7 @@ const {
 } = useField("name", nameValidation);
 
 const emailValidation = (value: string) => {
-  if (!value) return "This is a required field!";
+  // if (!value) return "This is a required field!";
 
   if (
     !/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
@@ -174,7 +201,7 @@ const {
 } = useField("email", emailValidation);
 
 const phoneValidation = (value: string) => {
-  if (!value) return "This is a required field!";
+  // if (!value) return "This is a required field!";
 
   if (!/^\d+$/.test(value)) {
     return "The phone number should contain only numbers!";
@@ -195,12 +222,26 @@ const {
   meta: phoneMeta,
 } = useField("phone", phoneValidation);
 
-// emit a ref to the name element for focusing
+const rebateAmount = ref(0);
+
+try {
+  distributor.value = await distributorsStore.fetchDistributorById(
+    props.distributorId
+  );
+
+  // assign the values to the form controls
+
+  name.value = distributor.value?.name;
+  email.value = distributor.value?.email;
+  phone.value = distributor.value?.phone;
+  rebateAmount.value = distributor.value?.rebateAmount;
+} catch (error: any) {
+  console.error(error);
+}
 
 const emits = defineEmits<{
   (e: "name-input", input: HTMLElement | null): void;
   (e: "close-modal", value: boolean): void;
-  (e: "add-consumer"): void;
 }>();
 
 const nameInputRef: Ref<HTMLInputElement | null> = ref(null);
@@ -219,8 +260,8 @@ const validateForm = () => {
   formIsValid.value = nameMeta.valid && emailMeta.valid && phoneMeta.valid;
 };
 
-const createConsumerPayload = () => {
-  const payload: CreateConsumer = {
+const createDistributorPayload = () => {
+  const payload: CreateDistributor = {
     name: name.value,
     email: email.value,
     phone: phone.value,
@@ -229,10 +270,13 @@ const createConsumerPayload = () => {
   return payload;
 };
 
-const onCreateClick = async (value: boolean) => {
+const updateDistributor = async (value: boolean) => {
   validateForm();
   if (formIsValid.value) {
-    await consumersStore.createConsumer({ ...createConsumerPayload() });
+    await distributorsStore.updateDistributor(
+      { ...createDistributorPayload() },
+      props.distributorId
+    );
     emits("close-modal", value);
   }
 };

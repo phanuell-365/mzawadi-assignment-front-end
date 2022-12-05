@@ -4,13 +4,12 @@
   </div>
   <MainCard>
     <SearchContainer
-      v-if="!distributorsIsLoading"
       :item-attributes="distributorsStore.getDistributorAttributes"
       :records="distributors"
-      :search-keys="['name', 'email']"
+      :search-keys="['name', 'email', 'phone']"
     >
-      <template #edit>
-        <GroupButton type="view" />
+      <template #edit="{ recordId }">
+        <GroupButton type="view" @click="onEditClick(recordId)" />
       </template>
     </SearchContainer>
   </MainCard>
@@ -27,35 +26,47 @@
         />
       </template>
     </ModalContainer>
+    <ModalContainer
+      :initial-focus="initialFocusElement"
+      :show="editShow"
+      dialog-title="Update Distributor"
+    >
+      <template #content>
+        <ManageDistributorForm
+          :distributor-id="distributorIdProp"
+          @name-input="onNameInputHandler"
+          @close-modal="onClose"
+        />
+      </template>
+    </ModalContainer>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { useRoutingStore } from "../stores/routing";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { ref, Ref } from "vue";
 import CardHeading from "../components/cards/CardHeading.vue";
 import ModalContainer from "../components/modals/create/ModalContainer.vue";
 import CreateDistributorForm from "../components/app/distributors/CreateDistributorForm.vue";
 import MainCard from "../components/cards/MainCard.vue";
 import SearchContainer from "../components/searching/SearchContainer.vue";
-import { useRequest } from "vue-request";
 import { useDistributorsStore } from "../stores/distributors";
 import GroupButton from "../components/buttons/GroupButton.vue";
+import ManageDistributorForm from "../components/app/distributors/ManageDistributorForm.vue";
+import { DistributorObject } from "../stores/distributors/interfaces";
 
 const distributorsStore = useDistributorsStore();
-
-const { data: distributors, loading: distributorsIsLoading } = useRequest(
-  distributorsStore.fetchDistributors(),
-  {
-    refreshOnWindowFocus: true,
-    pollingInterval: 60000,
-  }
-);
 
 const routingStore = useRoutingStore();
 
 const route = useRoute();
+
+const router = useRouter();
+
+const distributors: Ref<DistributorObject[] | undefined> = ref();
+
+distributors.value = await distributorsStore.fetchDistributors();
 
 // set the current route name in the routing store
 routingStore.setCurrentRoute(route?.name as string);
@@ -72,8 +83,19 @@ const onNameInputHandler = (input: HTMLInputElement) => {
   initialFocusElement.value = input;
 };
 
-const onClose = (value: boolean) => {
+const onClose = async (value: boolean) => {
   show.value = value;
+  distributors.value = await distributorsStore.fetchDistributors();
+  router.go(0);
+};
+
+const editShow = ref(false);
+
+const distributorIdProp = ref("");
+
+const onEditClick = (distributorId: string) => {
+  editShow.value = !editShow.value;
+  distributorIdProp.value = distributorId;
 };
 </script>
 

@@ -133,11 +133,11 @@
           >Value of Points</span
         >
         <input
-          id="points"
+          id="valueOfPoints"
           :value="valueOfPoints"
           class="peer block bg-white dark:bg-zinc-500 dark:text-stone-100 w-full border rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-1 sm:text-sm disabled:bg-stone-100 disabled:text-zinc-500 disabled:border-zinc-300 disabled:shadow-none"
           disabled
-          name="points"
+          name="valueOfPoints"
           readonly
           type="number"
         />
@@ -215,6 +215,10 @@ const {
 
 const phoneValidation = (value: string) => {
   // if (!value) return "This is a required field!";
+
+  if (!/^\d+$/.test(value)) {
+    return "The phone number should contain only numbers!";
+  }
 
   if (value.length < 10)
     return "The phone number should contain numbers not less than 10!";
