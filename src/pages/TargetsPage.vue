@@ -12,8 +12,8 @@
         :records="targets"
         :search-keys="['product', 'distributor']"
       >
-        <template #edit>
-          <GroupButton type="edit" />
+        <template #edit="{ recordId }">
+          <GroupButton type="edit" @click="onEditClick(recordId)" />
         </template>
       </SearchContainer>
     </template>
@@ -31,12 +31,25 @@
         />
       </template>
     </ModalContainer>
+    <ModalContainer
+      :initial-focus="initialFocusElement"
+      :show="editShow"
+      dialog-title="Manage a Target"
+    >
+      <template #content>
+        <ManageTargetForm
+          :target-id="targetIdProp"
+          @name-input="onNameInputHandler"
+          @close-modal="onClose"
+        />
+      </template>
+    </ModalContainer>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { useRoutingStore } from "../stores/routing";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import CardHeading from "../components/cards/CardHeading.vue";
 import ModalContainer from "../components/modals/create/ModalContainer.vue";
 import { ref, Ref } from "vue";
@@ -44,18 +57,17 @@ import CreateTargetForm from "../components/app/targets/CreateTargetForm.vue";
 import MainCard from "../components/cards/MainCard.vue";
 import SearchContainer from "../components/searching/SearchContainer.vue";
 import GroupButton from "../components/buttons/GroupButton.vue";
-import { useRequest } from "vue-request";
 import { useTargetsStore } from "../stores/targets";
+import ManageTargetForm from "../components/app/targets/ManageTargetForm.vue";
+import { TargetObjectWithDistributorAndProduct } from "../stores/targets/interfaces";
 
 const targetsStore = useTargetsStore();
 
-const { data: targets, loading: targetsIsLoading } = useRequest(
-  targetsStore.fetchTargetWithDistributorAndProduct(),
-  {
-    refreshOnWindowFocus: true,
-    pollingInterval: 60000,
-  }
-);
+const router = useRouter();
+
+const targets: Ref<TargetObjectWithDistributorAndProduct[] | undefined> = ref();
+
+targets.value = await targetsStore.fetchTargetWithDistributorAndProduct();
 
 const routingStore = useRoutingStore();
 
@@ -76,9 +88,20 @@ const onNameInputHandler = (input: HTMLInputElement) => {
   initialFocusElement.value = input;
 };
 
-const onClose = (value: boolean) => {
+const onClose = async (value: boolean) => {
   console.log("the value received", value);
   show.value = value;
+  targets.value = await targetsStore.fetchTargetWithDistributorAndProduct();
+  router.go(0);
+};
+
+const editShow = ref(false);
+
+const targetIdProp = ref("");
+
+const onEditClick = (targetId: string) => {
+  editShow.value = !editShow.value;
+  targetIdProp.value = targetId;
 };
 </script>
 

@@ -59,29 +59,40 @@ export const useTargetsStore = defineStore({
       return this.targets;
     },
 
-    async fetchTargetWithDistributorAndProduct() {
-      await this.fetchTargets();
-
+    async constructTargetWithDistributorAndProduct(targetObject: TargetObject) {
       const distributorsStore = useDistributorsStore();
 
       const productsStore = useProductsStore();
 
+      const distributor = await distributorsStore.fetchDistributorById(
+        targetObject.DistributorId
+      );
+
+      const product = await productsStore.fetchProductById(
+        targetObject.ProductId
+      );
+
+      const temp: TargetObjectWithDistributorAndProduct = {
+        id: targetObject.id,
+        distributor: distributor.name,
+        product: product.name,
+        salesTarget: targetObject.salesTarget,
+      };
+      return temp;
+    },
+
+    async fetchTargetWithDistributorAndProductById(targetId: string) {
+      return await this.constructTargetWithDistributorAndProduct(
+        await this.fetchTargetById(targetId)
+      );
+    },
+
+    async fetchTargetWithDistributorAndProduct() {
+      await this.fetchTargets();
+
       this.targetsWithDistributorAndProduct = await Promise.all(
         this.targets.map(async (value) => {
-          const distributor = await distributorsStore.fetchDistributorById(
-            value.DistributorId
-          );
-
-          const product = await productsStore.fetchProductById(value.ProductId);
-
-          const temp: TargetObjectWithDistributorAndProduct = {
-            id: value.id,
-            distributor: distributor.name,
-            product: product.name,
-            salesTarget: value.salesTarget,
-          };
-          console.log(temp);
-          return temp;
+          return await this.constructTargetWithDistributorAndProduct(value);
         })
       );
 

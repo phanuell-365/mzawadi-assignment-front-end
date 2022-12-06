@@ -36,7 +36,7 @@
             id="table-search"
             v-model="query"
             autocomplete="off"
-            class="block p-2 pl-10 w-80 text-sm text-zinc-900 bg-white rounded-lg border border-zinc-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-zinc-800 dark:border-zinc-600 dark:placeholder-zinc-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            class="block p-2 pl-10 w-80 text-sm text-zinc-900 bg-white rounded-lg border border-zinc-300 focus:ring-sky-500 focus:border-sky-500 dark:bg-zinc-800 dark:border-zinc-600 dark:placeholder-zinc-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="Search for items"
             type="text"
           />

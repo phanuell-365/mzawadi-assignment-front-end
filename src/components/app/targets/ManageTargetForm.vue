@@ -3,7 +3,7 @@
     <div class="md:flex flex-row flex-wrap mx-3">
       <label class="inline-block basis-1/2 p-3">
         <span
-          class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
           >Sales Target</span
         >
         <input
@@ -22,7 +22,6 @@
           }"
           class="peer block bg-white dark:bg-zinc-600 w-full border rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-1 sm:text-sm"
           name="salesTarget"
-          required
           type="tel"
         />
         <small
@@ -40,7 +39,7 @@
       </label>
       <label class="inline-block basis-1/2 p-3">
         <span
-          class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
           >Distributor</span
         >
         <select
@@ -83,7 +82,7 @@
       </label>
       <label class="inline-block basis-1/2 p-3">
         <span
-          class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
           >Product</span
         >
         <select
@@ -135,28 +134,36 @@
       </button>
       <button
         class="py-1 px-4 m-2 rounded-full bg-sky-400 focus:ring focus:ring-sky-200 active:ring-sky-300 hover:bg-sky-600 hover:text-white focus:outline-none transition ease-in-out delay-150 hover:-translate-y-0.5 duration-200"
-        @click="onCreateClick(false)"
+        @click="onUpdateClick(false)"
       >
-        Create
+        Update
       </button>
     </div>
   </form>
 </template>
 
 <script lang="ts" setup>
-import { useField } from "vee-validate";
-import { onMounted, ref, Ref } from "vue";
-import { CreateTarget } from "../../../stores/targets/interfaces";
-import { useRequest } from "vue-request";
 import { useDistributorsStore } from "../../../stores/distributors";
 import { useProductsStore } from "../../../stores/products";
 import { useTargetsStore } from "../../../stores/targets";
+import { useField } from "vee-validate";
+import { onMounted, ref, Ref } from "vue";
+import { useRequest } from "vue-request";
+import { CreateTarget, TargetObject } from "../../../stores/targets/interfaces";
+
+interface ManageTargetFormProps {
+  targetId: string;
+}
+
+const props = defineProps<ManageTargetFormProps>();
 
 const distributorsStore = useDistributorsStore();
 
 const productsStore = useProductsStore();
 
 const targetsStore = useTargetsStore();
+
+const target: Ref<TargetObject | undefined> = ref();
 
 const {
   value: DistributorName,
@@ -171,7 +178,7 @@ const {
 } = useField("productId");
 
 const salesTargetValidation = (value: string) => {
-  if (!value) return "This is a required field!";
+  // if (!value) return "This is a required field!";
 
   if (!/^\d+$/.test(value)) {
     return "The sales target should be a number!";
@@ -192,45 +199,15 @@ const {
   meta: salesTargetMeta,
 } = useField("salesTarget", salesTargetValidation);
 
-const {
-  data: distributors,
-  loading: distributorsLoading,
-  error: distributorsError,
-} = useRequest(distributorsStore.fetchDistributors(), {
-  refreshOnWindowFocus: true,
-  pollingInterval: 60000,
-});
+try {
+  target.value = await targetsStore.fetchTargetById(props.targetId);
 
-console.error(distributorsError);
-
-const {
-  data: products,
-  loading: productsLoading,
-  error: productsError,
-} = useRequest(productsStore.fetchProducts(), {
-  refreshOnWindowFocus: true,
-  pollingInterval: 60000,
-});
-
-console.error(productsError);
-
-// const selectedDistributor: Ref<DistributorObject> = ref(distributors.value[0]);
-//
-// watch(selectedDistributor, (value) => {
-//   DistributorName.value = value.id;
-// });
-//
-// const distributorQuery = ref("");
-//
-// const filteredDistributors = computed(() =>
-//   distributorQuery.value === ""
-//     ? distributors
-//     : distributors.value.filter((value) =>
-//         value.name.toLowerCase().includes(distributorQuery.value.toLowerCase())
-//       )
-// );
-//
-// const selectedProduct: Ref<ProductObject> = ref(products.value[0]);
+  DistributorName.value = target.value?.DistributorId;
+  ProductName.value = target.value?.ProductId;
+  salesTarget.value = target.value?.salesTarget.toString();
+} catch (error: any) {
+  console.error(error);
+}
 
 const emits = defineEmits<{
   (e: "name-input", input: HTMLElement | null): void;
@@ -254,6 +231,24 @@ const validateForm = () => {
     distributorIdMeta.valid && productIdMeta.valid && salesTargetMeta.valid;
 };
 
+const {
+  data: distributors,
+  loading: distributorsLoading,
+  error: distributorsError,
+} = useRequest(distributorsStore.fetchDistributors(), {
+  refreshOnWindowFocus: true,
+  pollingInterval: 60000,
+});
+
+const {
+  data: products,
+  loading: productsLoading,
+  error: productsError,
+} = useRequest(productsStore.fetchProducts(), {
+  refreshOnWindowFocus: true,
+  pollingInterval: 60000,
+});
+
 const createTargetPayload = () => {
   const payload: CreateTarget = {
     DistributorId: DistributorName.value as string,
@@ -264,12 +259,12 @@ const createTargetPayload = () => {
   return payload;
 };
 
-const onCreateClick = (value: boolean) => {
+const onUpdateClick = (value: boolean) => {
   validateForm();
 
   if (formIsValid.value) {
     emits("close-modal", value);
-    targetsStore.createTarget({ ...createTargetPayload() });
+    targetsStore.updateTarget({ ...createTargetPayload() }, props.targetId);
   }
 };
 </script>
