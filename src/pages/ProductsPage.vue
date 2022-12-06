@@ -4,17 +4,15 @@
   </div>
   <!-- Main heading for products -->
   <MainCard>
-    <template v-if="!productsIsLoading">
-      <SearchContainer
-        :item-attributes="productsStore.getProductsAttributes"
-        :records="products"
-        :search-keys="['name', 'price']"
-      >
-        <template #edit>
-          <GroupButton type="view" />
-        </template>
-      </SearchContainer>
-    </template>
+    <SearchContainer
+      :item-attributes="productsStore.getProductsAttributes"
+      :records="products"
+      :search-keys="['name', 'price']"
+    >
+      <template #edit="{ recordId }">
+        <GroupButton type="view" @click="onEditClick(recordId)" />
+      </template>
+    </SearchContainer>
   </MainCard>
   <div>
     <ModalContainer
@@ -29,35 +27,47 @@
         />
       </template>
     </ModalContainer>
+    <ModalContainer
+      :initial-focus="initialFocusElement"
+      :show="editShow"
+      dialog-title="Update Product"
+    >
+      <template #content>
+        <ManageProductForm
+          :product-id="productIdProp"
+          @close-modal="onClose"
+          @name-input="onNameInputHandler"
+        />
+      </template>
+    </ModalContainer>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { useRoutingStore } from "../stores/routing";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { ref, Ref } from "vue";
 import CardHeading from "../components/cards/CardHeading.vue";
 import ModalContainer from "../components/modals/create/ModalContainer.vue";
 import CreateProductForm from "../components/app/products/CreateProductForm.vue";
 import { useProductsStore } from "../stores/products";
-import { useRequest } from "vue-request";
 import GroupButton from "../components/buttons/GroupButton.vue";
 import SearchContainer from "../components/searching/SearchContainer.vue";
 import MainCard from "../components/cards/MainCard.vue";
+import ManageProductForm from "../components/app/products/ManageProductForm.vue";
+import { ProductObject } from "../stores/products/interfaces";
 
 const productsStore = useProductsStore();
-
-const { data: products, loading: productsIsLoading } = useRequest(
-  productsStore.fetchProducts(),
-  {
-    refreshOnWindowFocus: true,
-    pollingInterval: 60000,
-  }
-);
 
 const routingStore = useRoutingStore();
 
 const route = useRoute();
+
+const router = useRouter();
+
+const products: Ref<ProductObject[] | undefined> = ref();
+
+products.value = await productsStore.fetchProducts();
 
 const show: Ref<boolean> = ref(false);
 
@@ -74,9 +84,19 @@ const onNameInputHandler = (input: HTMLInputElement) => {
   initialFocusElement.value = input;
 };
 
-const onClose = (value: boolean) => {
-  console.log("the value received", value);
+const onClose = async (value: boolean) => {
   show.value = value;
+  products.value = await productsStore.fetchProducts();
+  router.go(0);
+};
+
+const editShow = ref(false);
+
+const productIdProp = ref("");
+
+const onEditClick = (productId: string) => {
+  editShow.value = !editShow.value;
+  productIdProp.value = productId;
 };
 </script>
 

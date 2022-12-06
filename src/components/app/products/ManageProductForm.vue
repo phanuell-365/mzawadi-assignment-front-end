@@ -3,7 +3,7 @@
     <div class="md:flex flex-row flex-wrap mx-3">
       <label class="inline-block basis-1/2 p-3">
         <span
-          class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
           >Name</span
         >
         <input
@@ -23,7 +23,6 @@
           autocomplete="off"
           class="peer block bg-white dark:bg-zinc-600 w-full border rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-1 sm:text-sm"
           name="name"
-          required
           type="text"
         />
         <small
@@ -42,7 +41,7 @@
 
       <label class="inline-block basis-1/2 p-3">
         <span
-          class="after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
+          class="block text-sm font-medium text-stone-700 dark:text-stone-50 pb-2"
           >Price</span
         >
         <input
@@ -60,7 +59,6 @@
           }"
           class="peer block bg-white dark:bg-zinc-600 w-full border rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-1 sm:text-sm"
           name="price"
-          required
           type="tel"
         />
         <small
@@ -87,24 +85,35 @@
       </button>
       <button
         class="py-1 px-4 m-2 rounded-full bg-sky-400 focus:ring focus:ring-sky-200 active:ring-sky-300 hover:bg-sky-600 hover:text-white focus:outline-none transition ease-in-out delay-150 hover:-translate-y-0.5 duration-200"
-        @click="onCreateClick(false)"
+        @click="onUpdateClick(false)"
       >
-        Create
+        Update
       </button>
     </div>
   </form>
 </template>
 
 <script lang="ts" setup>
-import { useField } from "vee-validate";
 import { onMounted, ref, Ref } from "vue";
-import { CreateProduct } from "../../../stores/products/interfaces";
+import {
+  CreateProduct,
+  ProductObject,
+} from "../../../stores/products/interfaces";
 import { useProductsStore } from "../../../stores/products";
+import { useField } from "vee-validate";
+
+interface ManageProductFormProps {
+  productId: string;
+}
+
+const props = defineProps<ManageProductFormProps>();
+
+const product: Ref<ProductObject | undefined> = ref();
 
 const productsStore = useProductsStore();
 
 const nameValidation = (value: string) => {
-  if (!value) return "This is a required field!";
+  // if (!value) return "This is a required field!";
 
   return true;
 };
@@ -116,9 +125,9 @@ const {
 } = useField("name", nameValidation);
 
 const priceValidation = (value: string) => {
-  if (!value) return "This is a required field!";
+  // if (!value) return "This is a required field!";
 
-  if (!/^\d+$/.test(value)) {
+  if (value.length > 0 && !/^\d+$/.test(value)) {
     return "The price should be a number!";
   }
 
@@ -136,6 +145,15 @@ const {
   errorMessage: priceErrorMessage,
   meta: priceMeta,
 } = useField("price", priceValidation);
+
+try {
+  product.value = await productsStore.fetchProductById(props.productId);
+
+  price.value = product.value?.price.toString();
+  name.value = product.value?.name;
+} catch (error: any) {
+  console.error(error);
+}
 
 // emit a ref to the name element for focusing
 
@@ -169,11 +187,14 @@ const createProductPayload = () => {
   return payload;
 };
 
-const onCreateClick = (value: boolean) => {
+const onUpdateClick = async (value: boolean) => {
   validateForm();
   if (formIsValid.value) {
     emits("close-modal", value);
-    productsStore.createProduct({ ...createProductPayload() });
+    await productsStore.updateProduct(
+      { ...createProductPayload() },
+      props.productId
+    );
   }
 };
 </script>
