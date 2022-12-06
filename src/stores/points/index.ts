@@ -69,6 +69,20 @@ export const usePointsStore = defineStore({
     async fetchPointsWithConsumerAndDistributorDataId() {
       await this.fetchPoints();
 
+      this.pointsWithConsumerProductAndDistributorDataId = await Promise.all(
+        this.points.map(async (value) => {
+          return await this.constructPointsWithConsumerAndDistributorDataId(
+            value
+          );
+        })
+      );
+
+      return this.pointsWithConsumerProductAndDistributorDataId;
+    },
+
+    async constructPointsWithConsumerAndDistributorDataId(
+      pointObject: PointObject
+    ) {
       const distributorsStore = useDistributorsStore();
 
       const consumersStore = useConsumersStore();
@@ -77,70 +91,79 @@ export const usePointsStore = defineStore({
 
       const salesStore = useSalesStore();
 
-      this.pointsWithConsumerProductAndDistributorDataId = await Promise.all(
-        this.points.map(async (value) => {
-          const sale = await salesStore.fetchSaleById(value.SaleId);
+      const sale = await salesStore.fetchSaleById(pointObject.SaleId);
 
-          const distributor = await distributorsStore.fetchDistributorById(
-            sale.DistributorId
-          );
-
-          const consumer = await consumersStore.fetchConsumerById(
-            sale.ConsumerId
-          );
-
-          const product = await productsStore.fetchProductById(sale.ProductId);
-
-          const temp: PointObjectWithConsumerProductAndDistributorId = {
-            id: value.id,
-            ConsumerId: consumer.id,
-            DistributorId: distributor.id,
-            ProductId: product.id,
-            points: value.points,
-            valueOfPoints: value.valueOfPoints,
-          };
-
-          return temp;
-        })
+      const distributor = await distributorsStore.fetchDistributorById(
+        sale.DistributorId
       );
 
-      return this.pointsWithConsumerProductAndDistributorDataId;
+      const consumer = await consumersStore.fetchConsumerById(sale.ConsumerId);
+
+      const product = await productsStore.fetchProductById(sale.ProductId);
+
+      const temp: PointObjectWithConsumerProductAndDistributorId = {
+        id: pointObject.id,
+        ConsumerId: consumer.id,
+        DistributorId: distributor.id,
+        ProductId: product.id,
+        points: pointObject.points,
+        valueOfPoints: pointObject.valueOfPoints,
+      };
+
+      return temp;
     },
 
-    async fetchPointsWithConsumerAndDistributorData() {
-      await this.fetchPointsWithConsumerAndDistributorDataId();
-
+    async constructPointWithConsumerAndDistributorData(
+      pointObjectWithConsumerProductAndDistributorId: PointObjectWithConsumerProductAndDistributorId
+    ) {
       const distributorsStore = useDistributorsStore();
 
       const consumersStore = useConsumersStore();
 
       const productsStore = useProductsStore();
 
+      const distributor = await distributorsStore.fetchDistributorById(
+        pointObjectWithConsumerProductAndDistributorId.DistributorId
+      );
+
+      const consumer = await consumersStore.fetchConsumerById(
+        pointObjectWithConsumerProductAndDistributorId.ConsumerId
+      );
+
+      const product = await productsStore.fetchProductById(
+        pointObjectWithConsumerProductAndDistributorId.ProductId
+      );
+
+      const temp: PointObjectWithConsumerProductAndDistributor = {
+        id: pointObjectWithConsumerProductAndDistributorId.id,
+        consumer: consumer.name,
+        distributor: distributor.name,
+        product: product.name,
+        points: pointObjectWithConsumerProductAndDistributorId.points,
+        valueOfPoints:
+          pointObjectWithConsumerProductAndDistributorId.valueOfPoints,
+      };
+
+      return temp;
+    },
+
+    async fetchPointWithConsumerAndDistributorDataById(pointId: string) {
+      return await this.constructPointWithConsumerAndDistributorData(
+        await this.constructPointsWithConsumerAndDistributorDataId(
+          await this.fetchPointById(pointId)
+        )
+      );
+    },
+
+    async fetchPointsWithConsumerAndDistributorData() {
+      await this.fetchPointsWithConsumerAndDistributorDataId();
+
       this.pointsWithConsumerProductAndDistributorData = await Promise.all(
         this.pointsWithConsumerProductAndDistributorDataId.map(
           async (value) => {
-            const distributor = await distributorsStore.fetchDistributorById(
-              value.DistributorId
+            return await this.constructPointWithConsumerAndDistributorData(
+              value
             );
-
-            const consumer = await consumersStore.fetchConsumerById(
-              value.ConsumerId
-            );
-
-            const product = await productsStore.fetchProductById(
-              value.ProductId
-            );
-
-            const temp: PointObjectWithConsumerProductAndDistributor = {
-              id: value.id,
-              consumer: consumer.name,
-              distributor: distributor.name,
-              product: product.name,
-              points: value.points,
-              valueOfPoints: value.valueOfPoints,
-            };
-
-            return temp;
           }
         )
       );

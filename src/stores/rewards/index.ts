@@ -39,6 +39,30 @@ export const useRewardsStore = defineStore({
 
       return tokenStore.getStoredToken();
     },
+
+    async constructRewardWithConsumerAndProduct(rewardObject: RewardObject) {
+      const distributorsStore = useDistributorsStore();
+
+      const productsStore = useProductsStore();
+
+      const distributor = await distributorsStore.fetchDistributorById(
+        rewardObject.DistributorId
+      );
+
+      const product = await productsStore.fetchProductById(
+        rewardObject.ProductId
+      );
+
+      const temp: RewardObjectWithConsumerAndProduct = {
+        id: rewardObject.id,
+        product: product.name,
+        distributor: distributor.name,
+        rebateAmount: rewardObject.rebateAmount,
+        dateOfRebate: moment(rewardObject.dateOfRebate).format("DD/MM/YYYY"),
+      };
+
+      return temp;
+    },
     async fetchRewards() {
       const response = await fetch(`${BASE_URL}/rewards`, {
         method: "GET",
@@ -73,30 +97,18 @@ export const useRewardsStore = defineStore({
       return data as RewardObject;
     },
 
+    async fetchRewardByIdWithProductAndDistributor(rewardId: string) {
+      const reward = await this.fetchRewardById(rewardId);
+
+      return await this.constructRewardWithConsumerAndProduct(reward);
+    },
+
     async fetchRewardsWithProductAndDistributor() {
       await this.fetchRewards();
 
-      const distributorsStore = useDistributorsStore();
-
-      const productsStore = useProductsStore();
-
       this.rewardsWithConsumerAndProduct = await Promise.all(
         this.rewards.map(async (value) => {
-          const distributor = await distributorsStore.fetchDistributorById(
-            value.DistributorId
-          );
-
-          const product = await productsStore.fetchProductById(value.ProductId);
-
-          const temp: RewardObjectWithConsumerAndProduct = {
-            id: value.id,
-            product: product.name,
-            distributor: distributor.name,
-            rebateAmount: value.rebateAmount,
-            dateOfRebate: moment(value.dateOfRebate).format("DD/MM/YYYY"),
-          };
-
-          return temp;
+          return await this.constructRewardWithConsumerAndProduct(value);
         })
       );
 
