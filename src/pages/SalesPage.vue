@@ -3,19 +3,17 @@
     <CardHeading @add-click="onAddClickHandler" />
   </div>
   <MainCard>
-    <template v-if="!salesIsLoading">
-      <SearchContainer
-        :item-attributes="
-          salesStore.getSalesAttributesWithConsumerDistributorAndProduct
-        "
-        :records="sales"
-        :search-keys="['consumer', 'product', 'distributor']"
-      >
-        <template #edit>
-          <GroupButton type="edit" />
-        </template>
-      </SearchContainer>
-    </template>
+    <SearchContainer
+      :item-attributes="
+        salesStore.getSalesAttributesWithConsumerDistributorAndProduct
+      "
+      :records="sales"
+      :search-keys="['consumer', 'product', 'distributor']"
+    >
+      <template #edit="{ recordId }">
+        <GroupButton type="edit" @click="onViewClick(recordId)" />
+      </template>
+    </SearchContainer>
   </MainCard>
   <div>
     <ModalContainer
@@ -27,6 +25,19 @@
         <CreateSaleForm
           @close-modal="onClose"
           @name-input="onNameInputHandler"
+        />
+      </template>
+    </ModalContainer>
+    <ModalContainer
+      :initial-focus="initialFocusElement"
+      :show="viewShow"
+      dialog-title="View a sale"
+    >
+      <template #content>
+        <ManageSaleForm
+          :sale-id="saleIdProp"
+          @name-input="onNameInputHandler"
+          @close-modal="onClose"
         />
       </template>
     </ModalContainer>
@@ -43,20 +54,18 @@ import { ref, Ref } from "vue";
 import MainCard from "../components/cards/MainCard.vue";
 import SearchContainer from "../components/searching/SearchContainer.vue";
 import { useSalesStore } from "../stores/sales";
-import { useRequest } from "vue-request";
 import GroupButton from "../components/buttons/GroupButton.vue";
+import { SaleObjectWithConsumerDistributorAndProduct } from "../stores/sales/interfaces";
+import ManageSaleForm from "../components/app/sales/ManageSaleForm.vue";
 
 const routingStore = useRoutingStore();
 
 const salesStore = useSalesStore();
 
-const { data: sales, loading: salesIsLoading } = useRequest(
-  salesStore.fetchSaleWithConsumerAndDistributor(),
-  {
-    refreshOnWindowFocus: true,
-    pollingInterval: 60000,
-  }
-);
+const sales: Ref<SaleObjectWithConsumerDistributorAndProduct[] | undefined> =
+  ref();
+
+sales.value = await salesStore.fetchSaleWithConsumerAndDistributor();
 
 const route = useRoute();
 
@@ -75,8 +84,19 @@ const onNameInputHandler = (input: HTMLInputElement) => {
   initialFocusElement.value = input;
 };
 
-const onClose = (value: boolean) => {
+const onClose = async (value: boolean) => {
   show.value = value;
+  viewShow.value = value;
+  sales.value = await salesStore.fetchSaleWithConsumerAndDistributor();
+};
+
+const viewShow = ref(false);
+
+const saleIdProp = ref("");
+
+const onViewClick = (saleId: string) => {
+  viewShow.value = !viewShow.value;
+  saleIdProp.value = saleId;
 };
 </script>
 

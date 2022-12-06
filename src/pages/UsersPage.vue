@@ -4,17 +4,15 @@
   </div>
   <!-- Main card for user with group button as edit -->
   <MainCard>
-    <template v-if="!usersIsLoading">
-      <SearchContainer
-        :item-attributes="usersStore.getUsersAttributes"
-        :records="users"
-        :search-keys="['name', 'email', 'role']"
-      >
-        <template #edit>
-          <GroupButton type="edit" />
-        </template>
-      </SearchContainer>
-    </template>
+    <SearchContainer
+      :item-attributes="usersStore.getUsersAttributes"
+      :records="users"
+      :search-keys="['name', 'email', 'role']"
+    >
+      <template #edit="{ recordId }">
+        <GroupButton type="edit" @click="onEditClick(recordId)" />
+      </template>
+    </SearchContainer>
   </MainCard>
   <div>
     <ModalContainer
@@ -29,12 +27,25 @@
         />
       </template>
     </ModalContainer>
+    <ModalContainer
+      :initial-focus="initialFocusElement"
+      :show="editShow"
+      dialog-title="Update user"
+    >
+      <template #content>
+        <ManageUserForm
+          :user-id="userIdProp"
+          @close-modal="onClose"
+          @name-input="onNameInputHandler"
+        />
+      </template>
+    </ModalContainer>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { useRoutingStore } from "../stores/routing";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import CardHeading from "../components/cards/CardHeading.vue";
 import ModalContainer from "../components/modals/create/ModalContainer.vue";
 import CreateUserForm from "../components/app/users/CreateUserForm.vue";
@@ -42,18 +53,17 @@ import { ref, Ref } from "vue";
 import MainCard from "../components/cards/MainCard.vue";
 import SearchContainer from "../components/searching/SearchContainer.vue";
 import { useUsersStore } from "../stores/users";
-import { useRequest } from "vue-request";
 import GroupButton from "../components/buttons/GroupButton.vue";
+import ManageUserForm from "../components/app/users/ManageUserForm.vue";
+import { UserObject } from "../stores/users/interfaces";
+
+const router = useRouter();
 
 const usersStore = useUsersStore();
 
-const { data: users, loading: usersIsLoading } = useRequest(
-  usersStore.fetchUsers(),
-  {
-    refreshOnWindowFocus: true,
-    pollingInterval: 60000,
-  }
-);
+const users: Ref<UserObject[] | undefined> = ref();
+
+users.value = await usersStore.fetchUsers();
 
 const routingStore = useRoutingStore();
 
@@ -74,8 +84,20 @@ const onNameInputHandler = (input: HTMLInputElement) => {
   initialFocusElement.value = input;
 };
 
-const onClose = (value: boolean) => {
+const editShow = ref(false);
+
+const userIdProp = ref("");
+
+const onClose = async (value: boolean) => {
   show.value = value;
+  editShow.value = value;
+  users.value = await usersStore.fetchUsers();
+  router.go(0);
+};
+
+const onEditClick = (userId: string) => {
+  editShow.value = !editShow.value;
+  userIdProp.value = userId;
 };
 </script>
 

@@ -82,38 +82,50 @@ export const useSalesStore = defineStore({
       return data as SaleObject;
     },
 
-    async fetchSaleWithConsumerAndDistributor() {
-      await this.fetchSales();
-
+    async constructSaleWithConsumerAndDistributor(saleObject: SaleObject) {
       const distributorsStore = useDistributorsStore();
 
       const consumersStore = useConsumersStore();
 
       const productsStore = useProductsStore();
 
+      const distributor = await distributorsStore.fetchDistributorById(
+        saleObject.DistributorId
+      );
+
+      const consumer = await consumersStore.fetchConsumerById(
+        saleObject.ConsumerId
+      );
+
+      const product = await productsStore.fetchProductById(
+        saleObject.ProductId
+      );
+
+      const temp: SaleObjectWithConsumerDistributorAndProduct = {
+        id: saleObject.id,
+        consumer: consumer.name,
+        distributor: distributor.name,
+        product: product.name,
+        quantitySold: saleObject.quantitySold,
+        totalAmount: saleObject.totalAmount,
+        soldAt: moment(saleObject.soldAt).format("MMMM Do YYYY h:mm:ss a"),
+      };
+
+      return temp;
+    },
+
+    async fetchSaleWithConsumerAndDistributorById(saleId: string) {
+      return await this.constructSaleWithConsumerAndDistributor(
+        await this.fetchSaleById(saleId)
+      );
+    },
+
+    async fetchSaleWithConsumerAndDistributor() {
+      await this.fetchSales();
+
       this.salesWithConsumerAndDistributor = await Promise.all(
         this.sales.map(async (value) => {
-          const distributor = await distributorsStore.fetchDistributorById(
-            value.DistributorId
-          );
-
-          const consumer = await consumersStore.fetchConsumerById(
-            value.ConsumerId
-          );
-
-          const product = await productsStore.fetchProductById(value.ProductId);
-
-          const temp: SaleObjectWithConsumerDistributorAndProduct = {
-            id: value.id,
-            consumer: consumer.name,
-            distributor: distributor.name,
-            product: product.name,
-            quantitySold: value.quantitySold,
-            totalAmount: value.totalAmount,
-            soldAt: moment(value.soldAt).format("MMMM Do YYYY h:mm:ss a"),
-          };
-
-          return temp;
+          return await this.constructSaleWithConsumerAndDistributor(value);
         })
       );
 

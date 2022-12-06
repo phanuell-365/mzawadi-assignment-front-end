@@ -1,12 +1,13 @@
 <template>
   <div>
-    <div class="py-2 my-3">
+    <div class="py-2 my-5">
       <RouterLink
         class="text-stone-800 dark:text-stone-50 text-3xl font-bold"
         to="/dashboard"
         >Company X.
       </RouterLink>
     </div>
+    <hr class="my-1.5 text-zinc-200 dark:text-zinc-600" />
     <div class="py-2">
       <RouterLink
         active-class="bg-zinc-50 dark:bg-zinc-600 text-green-900 dark:text-green-200 transition delay-100 duration-75 ease-in-out"
@@ -125,6 +126,16 @@
         <div class="px-2">Sales</div>
       </RouterLink>
     </div>
+    <div class="flex justify-evenly px-6 items-center">
+      <!--      <UseDark>-->
+      <SwitchGroup>
+        <SwitchLabel class="mr-4 text-sm">
+          <span class="dark:text-stone-50"> Toggle Dark </span>
+        </SwitchLabel>
+      </SwitchGroup>
+      <DarkModeSwitch />
+      <!--      </UseDark>-->
+    </div>
   </div>
 </template>
 
@@ -140,8 +151,11 @@ import {
   UsersIcon,
 } from "@heroicons/vue/24/outline";
 import { UserIcon as DistributorsIcon } from "@heroicons/vue/24/solid";
+// import UseDark from "@vueuse/components";
 import { Routes, useRoutingStore } from "../../stores/routing";
 import { reactive, ref, Ref } from "vue";
+import DarkModeSwitch from "./icons/DarkModeSwitch.vue";
+import { SwitchGroup, SwitchLabel } from "@headlessui/vue";
 
 const routingStore = useRoutingStore();
 

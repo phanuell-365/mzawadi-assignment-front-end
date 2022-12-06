@@ -259,12 +259,15 @@ const createTargetPayload = () => {
   return payload;
 };
 
-const onUpdateClick = (value: boolean) => {
+const onUpdateClick = async (value: boolean) => {
   validateForm();
 
   if (formIsValid.value) {
     emits("close-modal", value);
-    targetsStore.updateTarget({ ...createTargetPayload() }, props.targetId);
+    await targetsStore.updateTarget(
+      { ...createTargetPayload() },
+      props.targetId
+    );
   }
 };
 </script>
