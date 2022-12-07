@@ -37,7 +37,7 @@ export const useRewardsStore = defineStore({
     async getToken() {
       const tokenStore = useTokenStore();
 
-      return tokenStore.getStoredToken();
+      return "Bearer " + tokenStore.getStoredToken();
     },
 
     async constructRewardWithConsumerAndProduct(rewardObject: RewardObject) {

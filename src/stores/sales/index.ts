@@ -46,7 +46,7 @@ export const useSalesStore = defineStore({
     async getToken() {
       const tokenStore = useTokenStore();
 
-      return tokenStore.getStoredToken();
+      return "Bearer " + tokenStore.getStoredToken();
     },
     async fetchSales() {
       const response = await fetch(`${BASE_URL}/sales`, {

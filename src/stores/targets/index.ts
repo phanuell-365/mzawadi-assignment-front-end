@@ -39,7 +39,7 @@ export const useTargetsStore = defineStore({
     async getToken() {
       const tokenStore = useTokenStore();
 
-      return tokenStore.getStoredToken();
+      return "Bearer " + tokenStore.getStoredToken();
     },
     async fetchTargets() {
       const response = await fetch(`${BASE_URL}/targets`, {

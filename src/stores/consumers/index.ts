@@ -27,7 +27,7 @@ export const useConsumersStore = defineStore({
     async getToken() {
       const tokenStore = useTokenStore();
 
-      return tokenStore.getStoredToken();
+      return "Bearer " + tokenStore.getStoredToken();
     },
     async fetchConsumers() {
       const response = await fetch(`${BASE_URL}/consumers`, {
