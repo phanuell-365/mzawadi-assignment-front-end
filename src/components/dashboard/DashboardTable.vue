@@ -21,7 +21,7 @@
       <tr
         v-for="record in tableRecords"
         :key="record.id"
-        class="bg-white border-b dark:bg-zinc-800 dark:border-zinc-700"
+        class="bg-white border-b dark:bg-zinc-700 dark:border-zinc-600"
       >
         <DashboardTableData
           :table-attributes="attributes"

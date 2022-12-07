@@ -172,6 +172,9 @@
 import { useField } from "vee-validate";
 import { onMounted, ref, Ref } from "vue";
 import { CreateUser } from "../../../stores/users/interfaces";
+import { useUsersStore } from "../../../stores/users";
+
+const usersStore = useUsersStore();
 
 const usernameValidation = (value: string) => {
   if (!value) return "This is a required field!";
@@ -188,6 +191,13 @@ const {
 const emailValidation = (value: string) => {
   if (!value) return "This is a required field!";
 
+  if (
+    !/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+      value
+    )
+  )
+    return "Please enter a valid email!";
+
   if (!value.includes("@")) return "The email must have a '@'!";
 
   return true;
@@ -201,6 +211,10 @@ const {
 
 const phoneValidation = (value: string) => {
   if (!value) return "This is a required field!";
+
+  if (!/^\d+$/.test(value)) {
+    return "The phone number should contain only numbers!";
+  }
 
   if (value.length < 10)
     return "The phone number should contain numbers not less than 10!";
@@ -271,7 +285,7 @@ const onCreateClick = (value: boolean) => {
   validateForm();
   if (formIsValid.value) {
     emits("close-modal", value);
-    console.log({ ...createUserPayload() });
+    usersStore.createUser({ ...createUserPayload() });
   }
 };
 </script>

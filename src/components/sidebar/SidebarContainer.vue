@@ -127,14 +127,29 @@
       </RouterLink>
     </div>
     <div class="flex justify-evenly px-6 items-center">
-      <!--      <UseDark>-->
+      <div
+        class="logout p-1 bg-zinc-50 dark:bg-zinc-600 transition duration-75 ease-in-out hover:scale-y-105 hover:-translate-y-1 rounded cursor-pointer shadow-lg focus:ring-1 focus:ring-red-400 focus:outline-none"
+        @click="onLogout"
+      >
+        <svg
+          class="w-6 h-6 text-stone-600 dark:text-stone-300 m-1"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
       <SwitchGroup>
-        <SwitchLabel class="mr-4 text-sm">
-          <span class="dark:text-stone-50"> Toggle Dark </span>
-        </SwitchLabel>
+        <SwitchLabel class="mr-4 text-sm"></SwitchLabel>
       </SwitchGroup>
       <DarkModeSwitch />
-      <!--      </UseDark>-->
     </div>
   </div>
 </template>
@@ -152,22 +167,23 @@ import {
 } from "@heroicons/vue/24/outline";
 import { UserIcon as DistributorsIcon } from "@heroicons/vue/24/solid";
 // import UseDark from "@vueuse/components";
-import { Routes, useRoutingStore } from "../../stores/routing";
-import { reactive, ref, Ref } from "vue";
 import DarkModeSwitch from "./icons/DarkModeSwitch.vue";
 import { SwitchGroup, SwitchLabel } from "@headlessui/vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "../../stores/auth/auth";
 
-const routingStore = useRoutingStore();
+const router = useRouter();
 
-const currentRoute: Ref<Routes | undefined> = ref(routingStore.getCurrentRoute);
+const authStore = useAuthStore();
 
-const someComponent = import("@heroicons/vue/24/outline/UsersIcon");
+const onLogout = () => {
+  // call logout from the auth store
+  // router.push("/login");
 
-const routeInfo = reactive({
-  path: currentRoute.value?.path,
-  name: currentRoute.value?.name,
-  description: currentRoute.value?.description,
-});
+  authStore.logout();
+
+  router.push("/login");
+};
 </script>
 
 <style scoped></style>

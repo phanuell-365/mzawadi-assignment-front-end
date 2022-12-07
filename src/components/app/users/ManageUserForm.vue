@@ -158,7 +158,7 @@
         class="py-1 px-4 m-2 rounded-full bg-sky-400 focus:ring focus:ring-sky-200 active:ring-sky-300 hover:bg-sky-600 hover:text-white focus:outline-none transition ease-in-out delay-150 hover:-translate-y-0.5 duration-200"
         @click="onUpdateClick(false)"
       >
-        Create
+        Update
       </button>
     </div>
   </form>
@@ -195,6 +195,13 @@ const {
 const emailValidation = (value: string) => {
   if (!value) return "This is a required field!";
 
+  if (
+    !/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+      value
+    )
+  )
+    return "Please enter a valid email!";
+
   if (!value.includes("@")) return "The email must have a '@'!";
 
   return true;
@@ -208,6 +215,10 @@ const {
 
 const phoneValidation = (value: string) => {
   if (!value) return "This is a required field!";
+
+  if (!/^\d+$/.test(value)) {
+    return "The phone number should contain only numbers!";
+  }
 
   if (value.length < 10)
     return "The phone number should contain numbers not less than 10!";
