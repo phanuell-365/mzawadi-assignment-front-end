@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "build:tsc": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "build": "vite build"
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.4",

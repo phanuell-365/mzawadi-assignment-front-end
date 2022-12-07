@@ -15,7 +15,8 @@ module.exports = {
                 'inter': ['Inter', 'Ubuntu', 'sans-serif', 'serif'],
                 'inter-bold': ['Inter Bold', 'Ubuntu', 'san-serif', 'serif'],
                 'inter-semi-bold': ['Inter SemiBold', 'Ubuntu', 'san-serif'],
-                'poppins-light': ['Poppins Light', 'Ubuntu', 'san-serif', 'serif']
+                'poppins-light': ['Poppins Light', 'Ubuntu', 'san-serif', 'serif'],
+                'poppins-extra-bold': ['Poppins Extrabold', 'Ubuntu', 'san-serif', 'serif']
             },
             fontSize: {
                 'xxs': ['.625rem', {

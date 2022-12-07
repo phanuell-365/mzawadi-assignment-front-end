@@ -1,28 +1,21 @@
-<script lang="ts" setup>
-import SidebarLayout from "./layouts/SidebarLayout.vue";
-import { useDark, useToggle } from "@vueuse/core";
-import SidebarContainer from "./components/sidebar/SidebarContainer.vue";
-
-const isDark = useDark();
-const toggleDark = useToggle(isDark);
-</script>
+<script lang="ts" setup></script>
 
 <template>
-  <div class="dark:bg-zinc-600 bg-zinc-50 h-screen">
-    <SidebarLayout>
-      <template #navProps>
-        <SidebarContainer />
-      </template>
-      <template #pages>
-        <Suspense>
-          <template #default>
-            <RouterView></RouterView>
-          </template>
-          <template #fallback></template>
-        </Suspense>
-      </template>
-    </SidebarLayout>
-  </div>
+  <RouterView name="LoginPage"></RouterView>
+  <Suspense>
+    <template #default>
+      <div>
+        <RouterView></RouterView>
+      </div>
+    </template>
+    <template #fallback>
+      <div
+        class="dark:bg-zinc-600 bg-zinc-50 h-screen mx-auto flex flex-col justify-center items-center"
+      >
+        <span class="text-2xl"> Loading... </span>
+      </div>
+    </template>
+  </Suspense>
 </template>
 
 <style scoped></style>

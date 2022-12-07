@@ -1,46 +1,53 @@
 <template>
-  <div>
-    <CardHeading @add-click="onAddClickHandler" />
-    <MainCard>
-      <!--    <AllConsumers />-->
-      <SearchContainer
-        :item-attributes="consumersStore.getConsumersAttributes"
-        :records="consumersStore.getConsumers"
-        :search-keys="['name', 'email', 'phone']"
-      >
-        <template #edit="{ recordId }">
-          <GroupButton type="edit" @click="onEditClick(recordId)" />
-        </template>
-      </SearchContainer>
-    </MainCard>
-    <div>
-      <ModalContainer
-        :initial-focus="initialFocusElement"
-        :show="show"
-        dialog-title="Create Consumer"
-      >
-        <template #content>
-          <CreateConsumerForm
-            @close-modal="onClose"
-            @name-input="onNameInputHandler"
-          />
-        </template>
-      </ModalContainer>
-      <ModalContainer
-        :initial-focus="initialFocusElement"
-        :show="editShow"
-        dialog-title="Update Consumer"
-      >
-        <template #content>
-          <ManageConsumerForm
-            :consumer-id="consumerIdProp"
-            @name-input="onNameInputHandler"
-            @close-modal="onClose"
-          />
-        </template>
-      </ModalContainer>
-    </div>
-  </div>
+  <SidebarLayout>
+    <template #navProps>
+      <SidebarContainer />
+    </template>
+    <template #pages>
+      <div>
+        <CardHeading @add-click="onAddClickHandler" />
+        <MainCard>
+          <!--    <AllConsumers />-->
+          <SearchContainer
+            :item-attributes="consumersStore.getConsumersAttributes"
+            :records="consumers"
+            :search-keys="['name', 'email', 'phone']"
+          >
+            <template #edit="{ recordId }">
+              <GroupButton type="edit" @click="onEditClick(recordId)" />
+            </template>
+          </SearchContainer>
+        </MainCard>
+        <div>
+          <ModalContainer
+            :initial-focus="initialFocusElement"
+            :show="show"
+            dialog-title="Create Consumer"
+          >
+            <template #content>
+              <CreateConsumerForm
+                @close-modal="onClose"
+                @name-input="onNameInputHandler"
+              />
+            </template>
+          </ModalContainer>
+          <ModalContainer
+            :initial-focus="initialFocusElement"
+            :show="editShow"
+            dialog-title="Update Consumer"
+          >
+            <template #content>
+              <ManageConsumerForm
+                :consumer-id="consumerIdProp"
+                @name-input="onNameInputHandler"
+                @close-modal="onClose"
+              />
+            </template>
+          </ModalContainer>
+        </div>
+      </div>
+    </template>
+  </SidebarLayout>
 </template>
 
 <script lang="ts" setup>
@@ -58,6 +65,8 @@ import SearchContainer from "../components/searching/SearchContainer.vue";
 import GroupButton from "../components/buttons/GroupButton.vue";
 import { ConsumerObject } from "../stores/consumers/interfaces";
 import ManageConsumerForm from "../components/app/consumers/ManageConsumerForm.vue";
+import SidebarContainer from "../components/sidebar/SidebarContainer.vue";
+import SidebarLayout from "../layouts/SidebarLayout.vue";
 
 const consumersStore = useConsumersStore();
 
@@ -67,7 +76,13 @@ const router = useRouter();
 
 const consumers: Ref<ConsumerObject[] | undefined> = ref();
 
-consumers.value = await consumersStore.fetchConsumers();
+try {
+  consumers.value = await consumersStore.fetchConsumers();
+} catch (error: any) {
+  if (error.statusCode === 401) {
+    await router.push("/login");
+  }
+}
 
 const route = useRoute();
 
@@ -89,7 +104,14 @@ const onNameInputHandler = (input: HTMLInputElement) => {
 const onClose = async (value: boolean) => {
   show.value = value;
   editShow.value = value;
-  consumers.value = await consumersStore.fetchConsumers();
+
+  try {
+    consumers.value = await consumersStore.fetchConsumers();
+  } catch (error: any) {
+    if (error.statusCode === 401) {
+      await router.push("/login");
+    }
+  }
   router.go(0);
 };
 

@@ -26,12 +26,9 @@
 <script lang="ts" setup>
 import { MoonIcon, SunIcon } from "@heroicons/vue/24/outline";
 import { Switch } from "@headlessui/vue";
-import { useDark, useToggle } from "@vueuse/core";
+import { useDark } from "@vueuse/core";
 
 const enabled = useDark();
-const toggleDark = useToggle(enabled);
-
-console.log(toggleDark);
 </script>
 
 <style scoped></style>

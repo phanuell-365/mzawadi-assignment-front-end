@@ -1,45 +1,52 @@
 <template>
-  <div>
-    <CardHeading @add-click="onAddClickHandler" />
-  </div>
-  <MainCard>
-    <SearchContainer
-      :item-attributes="distributorsStore.getDistributorAttributes"
-      :records="distributors"
-      :search-keys="['name', 'email', 'phone']"
-    >
-      <template #edit="{ recordId }">
-        <GroupButton type="view" @click="onEditClick(recordId)" />
-      </template>
-    </SearchContainer>
-  </MainCard>
-  <div>
-    <ModalContainer
-      :initial-focus="initialFocusElement"
-      :show="show"
-      dialog-title="Create Distributor"
-    >
-      <template #content>
-        <CreateDistributorForm
-          @close-modal="onClose"
-          @name-input="onNameInputHandler"
-        />
-      </template>
-    </ModalContainer>
-    <ModalContainer
-      :initial-focus="initialFocusElement"
-      :show="editShow"
-      dialog-title="Update Distributor"
-    >
-      <template #content>
-        <ManageDistributorForm
-          :distributor-id="distributorIdProp"
-          @name-input="onNameInputHandler"
-          @close-modal="onClose"
-        />
-      </template>
-    </ModalContainer>
-  </div>
+  <SidebarLayout>
+    <template #navProps>
+      <SidebarContainer />
+    </template>
+    <template #pages>
+      <div>
+        <CardHeading @add-click="onAddClickHandler" />
+      </div>
+      <MainCard>
+        <SearchContainer
+          :item-attributes="distributorsStore.getDistributorAttributes"
+          :records="distributors"
+          :search-keys="['name', 'email', 'phone']"
+        >
+          <template #edit="{ recordId }">
+            <GroupButton type="view" @click="onEditClick(recordId)" />
+          </template>
+        </SearchContainer>
+      </MainCard>
+      <div>
+        <ModalContainer
+          :initial-focus="initialFocusElement"
+          :show="show"
+          dialog-title="Create Distributor"
+        >
+          <template #content>
+            <CreateDistributorForm
+              @close-modal="onClose"
+              @name-input="onNameInputHandler"
+            />
+          </template>
+        </ModalContainer>
+        <ModalContainer
+          :initial-focus="initialFocusElement"
+          :show="editShow"
+          dialog-title="Update Distributor"
+        >
+          <template #content>
+            <ManageDistributorForm
+              :distributor-id="distributorIdProp"
+              @name-input="onNameInputHandler"
+              @close-modal="onClose"
+            />
+          </template>
+        </ModalContainer>
+      </div>
+    </template>
+  </SidebarLayout>
 </template>
 
 <script lang="ts" setup>
@@ -55,6 +62,8 @@ import { useDistributorsStore } from "../stores/distributors";
 import GroupButton from "../components/buttons/GroupButton.vue";
 import ManageDistributorForm from "../components/app/distributors/ManageDistributorForm.vue";
 import { DistributorObject } from "../stores/distributors/interfaces";
+import SidebarLayout from "../layouts/SidebarLayout.vue";
+import SidebarContainer from "../components/sidebar/SidebarContainer.vue";
 
 const distributorsStore = useDistributorsStore();
 
@@ -66,7 +75,13 @@ const router = useRouter();
 
 const distributors: Ref<DistributorObject[] | undefined> = ref();
 
-distributors.value = await distributorsStore.fetchDistributors();
+try {
+  distributors.value = await distributorsStore.fetchDistributors();
+} catch (error: any) {
+  if (error.statusCode === 401) {
+    router.push("/login");
+  }
+}
 
 // set the current route name in the routing store
 routingStore.setCurrentRoute(route?.name as string);
@@ -85,7 +100,14 @@ const onNameInputHandler = (input: HTMLInputElement) => {
 
 const onClose = async (value: boolean) => {
   show.value = value;
-  distributors.value = await distributorsStore.fetchDistributors();
+
+  try {
+    distributors.value = await distributorsStore.fetchDistributors();
+  } catch (error: any) {
+    if (error.statusCode === 401) {
+      await router.push("/login");
+    }
+  }
   router.go(0);
 };
 

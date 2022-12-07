@@ -1,50 +1,55 @@
 <template>
-  <div>
-    <CardHeading @add-click="onAddClickHandler" />
-  </div>
-  <!-- Main card for targets -->
-  <MainCard>
-    <template v-if="!targetsIsLoading">
-      <SearchContainer
-        :item-attributes="
-          targetsStore.getTargetsAttributesWithDistributorAndProduct
-        "
-        :records="targets"
-        :search-keys="['product', 'distributor']"
-      >
-        <template #edit="{ recordId }">
-          <GroupButton type="edit" @click="onEditClick(recordId)" />
-        </template>
-      </SearchContainer>
+  <SidebarLayout>
+    <template #navProps>
+      <SidebarContainer />
     </template>
-  </MainCard>
-  <div>
-    <ModalContainer
-      :initial-focus="initialFocusElement"
-      :show="show"
-      dialog-title="Set target for a Distributor"
-    >
-      <template #content>
-        <CreateTargetForm
-          @close-modal="onClose"
-          @name-input="onNameInputHandler"
-        />
-      </template>
-    </ModalContainer>
-    <ModalContainer
-      :initial-focus="initialFocusElement"
-      :show="editShow"
-      dialog-title="Manage a Target"
-    >
-      <template #content>
-        <ManageTargetForm
-          :target-id="targetIdProp"
-          @name-input="onNameInputHandler"
-          @close-modal="onClose"
-        />
-      </template>
-    </ModalContainer>
-  </div>
+    <template #pages>
+      <div>
+        <CardHeading @add-click="onAddClickHandler" />
+      </div>
+      <!-- Main card for targets -->
+      <MainCard>
+        <SearchContainer
+          :item-attributes="
+            targetsStore.getTargetsAttributesWithDistributorAndProduct
+          "
+          :records="targets"
+          :search-keys="['product', 'distributor']"
+        >
+          <template #edit="{ recordId }">
+            <GroupButton type="edit" @click="onEditClick(recordId)" />
+          </template>
+        </SearchContainer>
+      </MainCard>
+      <div>
+        <ModalContainer
+          :initial-focus="initialFocusElement"
+          :show="show"
+          dialog-title="Set target for a Distributor"
+        >
+          <template #content>
+            <CreateTargetForm
+              @close-modal="onClose"
+              @name-input="onNameInputHandler"
+            />
+          </template>
+        </ModalContainer>
+        <ModalContainer
+          :initial-focus="initialFocusElement"
+          :show="editShow"
+          dialog-title="Manage a Target"
+        >
+          <template #content>
+            <ManageTargetForm
+              :target-id="targetIdProp"
+              @name-input="onNameInputHandler"
+              @close-modal="onClose"
+            />
+          </template>
+        </ModalContainer>
+      </div>
+    </template>
+  </SidebarLayout>
 </template>
 
 <script lang="ts" setup>
@@ -60,6 +65,8 @@ import GroupButton from "../components/buttons/GroupButton.vue";
 import { useTargetsStore } from "../stores/targets";
 import ManageTargetForm from "../components/app/targets/ManageTargetForm.vue";
 import { TargetObjectWithDistributorAndProduct } from "../stores/targets/interfaces";
+import SidebarLayout from "../layouts/SidebarLayout.vue";
+import SidebarContainer from "../components/sidebar/SidebarContainer.vue";
 
 const targetsStore = useTargetsStore();
 
@@ -67,7 +74,13 @@ const router = useRouter();
 
 const targets: Ref<TargetObjectWithDistributorAndProduct[] | undefined> = ref();
 
-targets.value = await targetsStore.fetchTargetWithDistributorAndProduct();
+try {
+  targets.value = await targetsStore.fetchTargetWithDistributorAndProduct();
+} catch (error: any) {
+  if (error.statusCode === 401) {
+    router.push("/login");
+  }
+}
 
 const routingStore = useRoutingStore();
 
@@ -91,7 +104,14 @@ const onNameInputHandler = (input: HTMLInputElement) => {
 const onClose = async (value: boolean) => {
   console.log("the value received", value);
   show.value = value;
-  targets.value = await targetsStore.fetchTargetWithDistributorAndProduct();
+
+  try {
+    targets.value = await targetsStore.fetchTargetWithDistributorAndProduct();
+  } catch (error: any) {
+    if (error.statusCode === 401) {
+      await router.push("/login");
+    }
+  }
   router.go(0);
 };
 

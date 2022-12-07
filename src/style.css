@@ -64,3 +64,10 @@
     font-weight: 200;
     font-style: normal;
 }
+
+@font-face {
+    font-family: 'Poppins Extrabold';
+    src: url('@/assets/fonts/Poppins-ExtraBold.ttf');
+    font-weight: 900;
+    font-style: normal;
+}

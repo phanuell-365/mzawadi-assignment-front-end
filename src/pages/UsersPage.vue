@@ -1,46 +1,53 @@
 <template>
-  <div>
-    <CardHeading @add-click="onAddClickHandler" />
-  </div>
-  <!-- Main card for user with group button as edit -->
-  <MainCard>
-    <SearchContainer
-      :item-attributes="usersStore.getUsersAttributes"
-      :records="users"
-      :search-keys="['name', 'email', 'role']"
-    >
-      <template #edit="{ recordId }">
-        <GroupButton type="edit" @click="onEditClick(recordId)" />
-      </template>
-    </SearchContainer>
-  </MainCard>
-  <div>
-    <ModalContainer
-      :initial-focus="initialFocusElement"
-      :show="show"
-      dialog-title="Create User"
-    >
-      <template #content>
-        <CreateUserForm
-          @close-modal="onClose"
-          @name-input="onNameInputHandler"
-        />
-      </template>
-    </ModalContainer>
-    <ModalContainer
-      :initial-focus="initialFocusElement"
-      :show="editShow"
-      dialog-title="Update user"
-    >
-      <template #content>
-        <ManageUserForm
-          :user-id="userIdProp"
-          @close-modal="onClose"
-          @name-input="onNameInputHandler"
-        />
-      </template>
-    </ModalContainer>
-  </div>
+  <SidebarLayout>
+    <template #navProps>
+      <SidebarContainer />
+    </template>
+    <template #pages>
+      <div>
+        <CardHeading @add-click="onAddClickHandler" />
+      </div>
+      <!-- Main card for user with group button as edit -->
+      <MainCard>
+        <SearchContainer
+          :item-attributes="usersStore.getUsersAttributes"
+          :records="users"
+          :search-keys="['name', 'email', 'role']"
+        >
+          <template #edit="{ recordId }">
+            <GroupButton type="edit" @click="onEditClick(recordId)" />
+          </template>
+        </SearchContainer>
+      </MainCard>
+      <div>
+        <ModalContainer
+          :initial-focus="initialFocusElement"
+          :show="show"
+          dialog-title="Create User"
+        >
+          <template #content>
+            <CreateUserForm
+              @close-modal="onClose"
+              @name-input="onNameInputHandler"
+            />
+          </template>
+        </ModalContainer>
+        <ModalContainer
+          :initial-focus="initialFocusElement"
+          :show="editShow"
+          dialog-title="Update user"
+        >
+          <template #content>
+            <ManageUserForm
+              :user-id="userIdProp"
+              @close-modal="onClose"
+              @name-input="onNameInputHandler"
+            />
+          </template>
+        </ModalContainer>
+      </div>
+    </template>
+  </SidebarLayout>
 </template>
 
 <script lang="ts" setup>
@@ -56,6 +63,8 @@ import { useUsersStore } from "../stores/users";
 import GroupButton from "../components/buttons/GroupButton.vue";
 import ManageUserForm from "../components/app/users/ManageUserForm.vue";
 import { UserObject } from "../stores/users/interfaces";
+import SidebarLayout from "../layouts/SidebarLayout.vue";
+import SidebarContainer from "../components/sidebar/SidebarContainer.vue";
 
 const router = useRouter();
 
@@ -63,7 +72,13 @@ const usersStore = useUsersStore();
 
 const users: Ref<UserObject[] | undefined> = ref();
 
-users.value = await usersStore.fetchUsers();
+try {
+  users.value = await usersStore.fetchUsers();
+} catch (error: any) {
+  if (error.statusCode === 401) {
+    router.push("/login");
+  }
+}
 
 const routingStore = useRoutingStore();
 
@@ -91,7 +106,14 @@ const userIdProp = ref("");
 const onClose = async (value: boolean) => {
   show.value = value;
   editShow.value = value;
-  users.value = await usersStore.fetchUsers();
+
+  try {
+    users.value = await usersStore.fetchUsers();
+  } catch (error: any) {
+    if (error.statusCode === 401) {
+      await router.push("/login");
+    }
+  }
   router.go(0);
 };
 

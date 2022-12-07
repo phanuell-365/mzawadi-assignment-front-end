@@ -1,46 +1,53 @@
 <template>
-  <div>
-    <CardHeading @add-click="onAddClickHandler" />
-  </div>
-  <!-- Main heading for products -->
-  <MainCard>
-    <SearchContainer
-      :item-attributes="productsStore.getProductsAttributes"
-      :records="products"
-      :search-keys="['name', 'price']"
-    >
-      <template #edit="{ recordId }">
-        <GroupButton type="view" @click="onEditClick(recordId)" />
-      </template>
-    </SearchContainer>
-  </MainCard>
-  <div>
-    <ModalContainer
-      :initial-focus="initialFocusElement"
-      :show="show"
-      dialog-title="Create Product"
-    >
-      <template #content>
-        <CreateProductForm
-          @close-modal="onClose"
-          @name-input="onNameInputHandler"
-        />
-      </template>
-    </ModalContainer>
-    <ModalContainer
-      :initial-focus="initialFocusElement"
-      :show="editShow"
-      dialog-title="Update Product"
-    >
-      <template #content>
-        <ManageProductForm
-          :product-id="productIdProp"
-          @close-modal="onClose"
-          @name-input="onNameInputHandler"
-        />
-      </template>
-    </ModalContainer>
-  </div>
+  <SidebarLayout>
+    <template #navProps>
+      <SidebarContainer />
+    </template>
+    <template #pages>
+      <div>
+        <CardHeading @add-click="onAddClickHandler" />
+      </div>
+      <!-- Main heading for products -->
+      <MainCard>
+        <SearchContainer
+          :item-attributes="productsStore.getProductsAttributes"
+          :records="products"
+          :search-keys="['name', 'price']"
+        >
+          <template #edit="{ recordId }">
+            <GroupButton type="view" @click="onEditClick(recordId)" />
+          </template>
+        </SearchContainer>
+      </MainCard>
+      <div>
+        <ModalContainer
+          :initial-focus="initialFocusElement"
+          :show="show"
+          dialog-title="Create Product"
+        >
+          <template #content>
+            <CreateProductForm
+              @close-modal="onClose"
+              @name-input="onNameInputHandler"
+            />
+          </template>
+        </ModalContainer>
+        <ModalContainer
+          :initial-focus="initialFocusElement"
+          :show="editShow"
+          dialog-title="Update Product"
+        >
+          <template #content>
+            <ManageProductForm
+              :product-id="productIdProp"
+              @close-modal="onClose"
+              @name-input="onNameInputHandler"
+            />
+          </template>
+        </ModalContainer>
+      </div>
+    </template>
+  </SidebarLayout>
 </template>
 
 <script lang="ts" setup>
@@ -56,6 +63,8 @@ import SearchContainer from "../components/searching/SearchContainer.vue";
 import MainCard from "../components/cards/MainCard.vue";
 import ManageProductForm from "../components/app/products/ManageProductForm.vue";
 import { ProductObject } from "../stores/products/interfaces";
+import SidebarContainer from "../components/sidebar/SidebarContainer.vue";
+import SidebarLayout from "../layouts/SidebarLayout.vue";
 
 const productsStore = useProductsStore();
 
@@ -67,7 +76,13 @@ const router = useRouter();
 
 const products: Ref<ProductObject[] | undefined> = ref();
 
-products.value = await productsStore.fetchProducts();
+try {
+  products.value = await productsStore.fetchProducts();
+} catch (error: any) {
+  if (error.statusCode === 401) {
+    router.push("/login");
+  }
+}
 
 const show: Ref<boolean> = ref(false);
 
@@ -86,7 +101,14 @@ const onNameInputHandler = (input: HTMLInputElement) => {
 
 const onClose = async (value: boolean) => {
   show.value = value;
-  products.value = await productsStore.fetchProducts();
+
+  try {
+    products.value = await productsStore.fetchProducts();
+  } catch (error: any) {
+    if (error.statusCode === 401) {
+      await router.push("/login");
+    }
+  }
   router.go(0);
 };
 

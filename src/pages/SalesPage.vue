@@ -1,52 +1,59 @@
 <template>
-  <div>
-    <CardHeading @add-click="onAddClickHandler" />
-  </div>
-  <MainCard>
-    <SearchContainer
-      :item-attributes="
-        salesStore.getSalesAttributesWithConsumerDistributorAndProduct
-      "
-      :records="sales"
-      :search-keys="['consumer', 'product', 'distributor']"
-    >
-      <template #edit="{ recordId }">
-        <GroupButton type="edit" @click="onViewClick(recordId)" />
-      </template>
-    </SearchContainer>
-  </MainCard>
-  <div>
-    <ModalContainer
-      :initial-focus="initialFocusElement"
-      :show="show"
-      dialog-title="Create User"
-    >
-      <template #content>
-        <CreateSaleForm
-          @close-modal="onClose"
-          @name-input="onNameInputHandler"
-        />
-      </template>
-    </ModalContainer>
-    <ModalContainer
-      :initial-focus="initialFocusElement"
-      :show="viewShow"
-      dialog-title="View a sale"
-    >
-      <template #content>
-        <ManageSaleForm
-          :sale-id="saleIdProp"
-          @name-input="onNameInputHandler"
-          @close-modal="onClose"
-        />
-      </template>
-    </ModalContainer>
-  </div>
+  <SidebarLayout>
+    <template #navProps>
+      <SidebarContainer />
+    </template>
+    <template #pages>
+      <div>
+        <CardHeading @add-click="onAddClickHandler" />
+      </div>
+      <MainCard>
+        <SearchContainer
+          :item-attributes="
+            salesStore.getSalesAttributesWithConsumerDistributorAndProduct
+          "
+          :records="sales"
+          :search-keys="['consumer', 'product', 'distributor']"
+        >
+          <template #edit="{ recordId }">
+            <GroupButton type="edit" @click="onViewClick(recordId)" />
+          </template>
+        </SearchContainer>
+      </MainCard>
+      <div>
+        <ModalContainer
+          :initial-focus="initialFocusElement"
+          :show="show"
+          dialog-title="Create User"
+        >
+          <template #content>
+            <CreateSaleForm
+              @close-modal="onClose"
+              @name-input="onNameInputHandler"
+            />
+          </template>
+        </ModalContainer>
+        <ModalContainer
+          :initial-focus="initialFocusElement"
+          :show="viewShow"
+          dialog-title="View a sale"
+        >
+          <template #content>
+            <ManageSaleForm
+              :sale-id="saleIdProp"
+              @name-input="onNameInputHandler"
+              @close-modal="onClose"
+            />
+          </template>
+        </ModalContainer>
+      </div>
+    </template>
+  </SidebarLayout>
 </template>
 
 <script lang="ts" setup>
 import { useRoutingStore } from "../stores/routing";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import CardHeading from "../components/cards/CardHeading.vue";
 import ModalContainer from "../components/modals/create/ModalContainer.vue";
 import CreateSaleForm from "../components/app/sales/CreateSaleForm.vue";
@@ -57,6 +64,10 @@ import { useSalesStore } from "../stores/sales";
 import GroupButton from "../components/buttons/GroupButton.vue";
 import { SaleObjectWithConsumerDistributorAndProduct } from "../stores/sales/interfaces";
 import ManageSaleForm from "../components/app/sales/ManageSaleForm.vue";
+import SidebarLayout from "../layouts/SidebarLayout.vue";
+import SidebarContainer from "../components/sidebar/SidebarContainer.vue";
+
+const router = useRouter();
 
 const routingStore = useRoutingStore();
 
@@ -65,7 +76,13 @@ const salesStore = useSalesStore();
 const sales: Ref<SaleObjectWithConsumerDistributorAndProduct[] | undefined> =
   ref();
 
-sales.value = await salesStore.fetchSaleWithConsumerAndDistributor();
+try {
+  sales.value = await salesStore.fetchSaleWithConsumerAndDistributor();
+} catch (error: any) {
+  if (error.message === "Unauthorized") {
+    router.push({ name: "login" });
+  }
+}
 
 const route = useRoute();
 
@@ -87,7 +104,14 @@ const onNameInputHandler = (input: HTMLInputElement) => {
 const onClose = async (value: boolean) => {
   show.value = value;
   viewShow.value = value;
-  sales.value = await salesStore.fetchSaleWithConsumerAndDistributor();
+
+  try {
+    sales.value = await salesStore.fetchSaleWithConsumerAndDistributor();
+  } catch (error: any) {
+    if (error.statusCode === 401) {
+      await router.push({ name: "login" });
+    }
+  }
 };
 
 const viewShow = ref(false);
