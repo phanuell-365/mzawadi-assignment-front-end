@@ -12,6 +12,28 @@
 - Browser (Chrome (Recommended), Firefox, Edge, Safari)
 - [mzawadi-assignment-back-end](https://github.com/phanuell-365/mzawadi-assignment-back-end)
 
+## Environment Variables
+
+The following environment variables are required for the application to run:
+
+- `VITE_VUE_APP_API_URL` - The URL of the back end API. Default is `http://localhost:3000/api/v1`. The port number
+  should be
+  the same as the port number of the back end API. The port number can be changed by setting the `PORT` environment
+  variable.
+  The `PORT` environment variable is located in the `.env` file of the back end API. The postfix `/api/v1` should not be
+  changed.
+
+### Creating the Environment File
+
+The environment variables are stored in the `.env` file. To create the `.env` file, run the following command:
+
+```bash
+cp .env.example .env
+```
+
+- Then, open the `.env` file and set the environment variables.
+- The `.env.example` file contains the default values of the environment variables.
+
 ## Project Setup
 
 Please ensure that you have the prerequisites installed before proceeding with the installation.
@@ -58,6 +80,7 @@ npm run preview
 
 ## Launching the application
 
+- Ensure that the back end application is running.
 - The application will be launched on port 4173 by default when running on production mode, and 5173 while running in
   development mode. You can change the port by setting the `PORT` environment variable.
 - To view the application, open your browser and navigate to `http://localhost:4173/login`
