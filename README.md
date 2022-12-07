@@ -19,7 +19,7 @@ Please ensure that you have the prerequisites installed before proceeding with t
 - Clone the repository
 
 ```bash
-git clone https://github.com/phanuell-365/mzawadi-assignment-back-end.git
+git clone https://github.com/phanuell-365/mzawadi-assignment-front-end.git
 ```
 
 - Enter the project directory
