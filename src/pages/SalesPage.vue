@@ -24,7 +24,7 @@
         <ModalContainer
           :initial-focus="initialFocusElement"
           :show="show"
-          dialog-title="Create User"
+          dialog-title="Create Sale"
         >
           <template #content>
             <CreateSaleForm
@@ -112,6 +112,8 @@ const onClose = async (value: boolean) => {
       await router.push({ name: "login" });
     }
   }
+
+  router.go(0);
 };
 
 const viewShow = ref(false);
