@@ -41,7 +41,6 @@ const thatCanAdd = ref([
   "target",
   "distributor",
   "consumer",
-  "user",
   "product",
   "sale",
 ]);
