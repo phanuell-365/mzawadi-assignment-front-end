@@ -264,12 +264,16 @@ const createTargetPayload = () => {
   return payload;
 };
 
-const onCreateClick = (value: boolean) => {
+const onCreateClick = async (value: boolean) => {
   validateForm();
 
   if (formIsValid.value) {
     emits("close-modal", value);
-    targetsStore.createTarget({ ...createTargetPayload() });
+    try {
+      await targetsStore.createTarget({ ...createTargetPayload() });
+    } catch (error: any) {
+      console.error(error);
+    }
   }
 };
 </script>

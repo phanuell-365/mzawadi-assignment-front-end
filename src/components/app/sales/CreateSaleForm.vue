@@ -1,5 +1,21 @@
 <template>
   <form autocomplete="off" novalidate @submit.prevent>
+    <div
+      :class="{
+        visible: toastErrorDescription.length > 0,
+        invisible: toastErrorDescription.length === 0,
+      }"
+      class="pb-3 mb-1 rounded text-pink-600 dark:text-pink-400 flex flex-col items-center justify-center"
+    >
+      <br />
+      <span class="text-2xl block">
+        {{ toastErrorDescription }}
+      </span>
+      <span class="block text-sm">
+        Please view available
+        <RouterLink class="underline" to="/targets"> /targets </RouterLink>
+      </span>
+    </div>
     <div class="md:flex flex-row flex-wrap mx-3">
       <label class="inline-block basis-1/2 p-3">
         <span
@@ -198,6 +214,7 @@ import { useRequest } from "vue-request";
 import { useDistributorsStore } from "../../../stores/distributors";
 import { useProductsStore } from "../../../stores/products";
 import { useConsumersStore } from "../../../stores/consumers";
+import { startCase } from "lodash";
 
 const salesStore = useSalesStore();
 
@@ -313,11 +330,20 @@ const createSalesPayload = () => {
   return payload;
 };
 
-const onCreateClick = (value: boolean) => {
+const toastErrorDescription: Ref<string> = ref("");
+
+const onCreateClick = async (value: boolean) => {
   validateForm();
   if (formIsValid.value) {
-    emits("close-modal", value);
-    salesStore.createSale({ ...createSalesPayload() });
+    try {
+      await salesStore.createSale({ ...createSalesPayload() });
+      emits("close-modal", value);
+    } catch (error: any) {
+      if (error.statusCode === 404) {
+        toastErrorDescription.value =
+          startCase(error.message.toLowerCase()) + "!";
+      }
+    }
   }
 };
 </script>
